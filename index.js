@@ -1,5 +1,5 @@
 const readline = require('readline');
-const chatFlow = require('./jsonTest.json'); 
+const chatFlow = require('./jsonFlux.json'); 
 
 const rl = readline.createInterface({
   input: process.stdin,

@@ -1,126 +1,174 @@
 {
-    "initialState": "welcome",
-    "states": {
-      "welcome": {
-        "id": "welcome",
-        "message": "Bem-vindo ao nosso Chat! Como posso ajudá-lo hoje?",
-        "options": [
-          {
-            "text": "Quero saber mais sobre o produto.",
-            "next": "productInfo"
-          },
-          {
-            "text": "Preciso de ajuda com um problema.",
-            "next": "support"
-          }
-        ]
-      },
-      "productInfo": {
-        "id": "productInfo",
-        "message": "Nosso produto é incrível! Ele ajuda você a fazer X, Y e Z. Deseja saber mais detalhes ou voltar ao início?",
-        "options": [
-          {
-            "text": "Mais detalhes, por favor.",
-            "next": "moreDetails"
-          },
-          {
-            "text": "Voltar ao início.",
-            "next": "welcome"
-          }
-        ]
-      },
-      "support": {
-        "id": "support",
-        "message": "Sinto muito que você esteja enfrentando problemas. Posso ajudá-lo com algo específico?",
-        "options": [
-          {
-            "text": "Sim, tenho um problema específico.",
-            "next": "specificProblem"
-          },
-          {
-            "text": "Não, só estava testando.",
-            "next": "welcome"
-          }
-        ]
-      },
-      "moreDetails": {
-        "id": "moreDetails",
-        "message": "Aqui estão mais detalhes sobre o produto... [detalhes]. Gostaria de fazer outra pergunta?",
-        "options": [
-          {
-            "text": "Sim, tenho outra pergunta.",
-            "next": "welcome"
-          },
-          {
-            "text": "Não, obrigado.",
-            "next": "end"
-          }
-        ]
-      },
-      "specificProblem": {
-        "id": "specificProblem",
-        "message": "Por favor, descreva seu problema ou escolha uma opção comum abaixo.",
-        "options": [
-          {
-            "text": "Problema com o login.",
-            "next": "loginProblem"
-          },
-          {
-            "text": "Problema com o pagamento.",
-            "next": "paymentProblem"
-          },
-          {
-            "text": "Outro.",
-            "next": "otherProblem"
-          }
-        ]
-      },
-      "loginProblem": {
-        "id": "loginProblem",
-        "message": "Para problemas de login, você pode tentar redefinir sua senha ou entrar em contato com o suporte. Precisa de mais ajuda?",
-        "options": [
-          {
-            "text": "Sim, preciso de mais ajuda.",
-            "next": "support"
-          },
-          {
-            "text": "Não, isso resolve.",
-            "next": "end"
-          }
-        ]
-      },
-      "paymentProblem": {
-        "id": "paymentProblem",
-        "message": "Para problemas de pagamento, verifique se seus dados estão corretos ou se sua conta tem saldo suficiente. Ainda precisa de ajuda?",
-        "options": [
-          {
-            "text": "Sim, ainda preciso de ajuda.",
-            "next": "support"
-          },
-          {
-            "text": "Não, vou verificar isso.",
-            "next": "end"
-          }
-        ]
-      },
-      "otherProblem": {
-        "id": "otherProblem",
-        "message": "Por favor, entre em contato com nosso suporte para descrever seu problema. Gostaria de voltar ao início ou encerrar o chat?",
-        "options": [
-          {
-            "text": "Voltar ao início.",
-            "next": "welcome"
-          },
-          {
-            "text": "Encerrar o chat.",
-            "next": "end"
-          }
-        ]
-      },
-      "end": {
-        "id": "end",
-        "message": "Obrigado por usar nosso chat. Tenha um ótimo dia!",
-        "options": []
-      }
+  "initialState": "welcome",
+  "states": {
+    "welcome": {
+      "id": "welcome",
+      "message": "Bem-vindo ao Chat do Futebol Brasileiro! Como posso ajudá-lo hoje?",
+      "options": [
+        {
+          "text": "Quero saber mais sobre os times.",
+          "next": "teamInfo"
+        },
+        {
+          "text": "Informações sobre campeonatos.",
+          "next": "championshipInfo"
+        },
+        {
+          "text": "História do futebol brasileiro.",
+          "next": "history"
+        }
+      ]
+    },
+    "teamInfo": {
+      "id": "teamInfo",
+      "message": "Sobre qual time você gostaria de saber mais?",
+      "options": [
+        {
+          "text": "Flamengo",
+          "next": "flamengoInfo"
+        },
+        {
+          "text": "São Paulo",
+          "next": "saoPauloInfo"
+        },
+        {
+          "text": "Voltar",
+          "next": "welcome"
+        }
+      ]
+    },
+    "flamengoInfo": {
+      "id": "flamengoInfo",
+      "message": "O Flamengo, um dos maiores clubes do Brasil, tem uma rica história de vitórias. Deseja saber mais sobre títulos ou jogadores históricos?",
+      "options": [
+        {
+          "text": "Títulos",
+          "next": "flamengoTitles"
+        },
+        {
+          "text": "Jogadores históricos",
+          "next": "flamengoPlayers"
+        },
+        {
+          "text": "Voltar",
+          "next": "teamInfo"
+        }
+      ]
+    },
+    "saoPauloInfo": {
+      "id": "saoPauloInfo",
+      "message": "O São Paulo é conhecido por sua forte base de formação de jogadores. Deseja saber mais sobre títulos ou jogadores históricos?",
+      "options": [
+        {
+          "text": "Títulos",
+          "next": "saoPauloTitles"
+        },
+        {
+          "text": "Jogadores históricos",
+          "next": "saoPauloPlayers"
+        },
+        {
+          "text": "Voltar",
+          "next": "teamInfo"
+        }
+      ]
+    },
+    "flamengoTitles": {
+      "id": "flamengoTitles",
+      "message": "O Flamengo conquistou diversos títulos, incluindo a Libertadores e o Campeonato Brasileiro. Deseja saber mais detalhes?",
+      "options": [
+        {
+          "text": "Sim, quero mais detalhes.",
+          "next": "flamengoTitlesDetails"
+        },
+        {
+          "text": "Não, voltar.",
+          "next": "flamengoInfo"
+        }
+      ]
+    },
+    "flamengoPlayers": {
+      "id": "flamengoPlayers",
+      "message": "Jogadores como Zico e Romário marcaram a história do Flamengo. Deseja saber mais sobre algum jogador específico?",
+      "options": [
+        {
+          "text": "Sim, quero saber mais.",
+          "next": "flamengoPlayerDetails"
+        },
+        {
+          "text": "Não, voltar.",
+          "next": "flamengoInfo"
+        }
+      ]
+    },
+    "saoPauloTitles": {
+      "id": "saoPauloTitles",
+      "message": "O São Paulo é tricampeão da Libertadores. Deseja explorar mais sobre esses títulos?",
+      "options": [
+        {
+          "text": "Sim, quero explorar.",
+          "next": "saoPauloTitlesDetails"
+        },
+        {
+          "text": "Não, voltar.",
+          "next": "saoPauloInfo"
+        }
+      ]
+    },
+    "saoPauloPlayers": {
+      "id": "saoPauloPlayers",
+      "message": "Rogério Ceni e Raí são ícones do São Paulo. Deseja detalhes sobre outros jogadores?",
+      "options": [
+        {
+          "text": "Sim, quero detalhes.",
+          "next": "saoPauloPlayerDetails"
+        },
+        {
+          "text": "Não, voltar.",
+          "next": "saoPauloInfo"
+        }
+      ]
+    },
+    "championshipInfo": {
+      "id": "championshipInfo",
+      "message": "Temos várias competições emocionantes. Sobre qual campeonato você gostaria de saber mais?",
+      "options": [
+        {
+          "text": "Campeonato Brasileiro",
+          "next": "brasileirao"
+        },
+        {
+          "text": "Copa do Brasil",
+          "next": "copaBrasil"
+        },
+        {
+          "text": "Voltar",
+          "next": "welcome"
+        }
+      ]
+    },
+    "history": {
+      "id": "history",
+      "message": "O futebol brasileiro é rico em história, desde Pelé até Neymar. O que gostaria de saber?",
+      "options": [
+        {
+          "text": "História da Seleção Brasileira",
+          "next": "selecaoHistory"
+        },
+        {
+          "text": "Grandes momentos do futebol brasileiro",
+          "next": "greatMoments"
+        },
+        {
+          "text": "Voltar",
+          "next": "welcome"
+        }
+      ]
+    },
+    "end": {
+      "id": "end",
+      "message": "Obrigado por usar nosso chat sobre o futebol brasileiro. Esperamos vê-lo novamente em breve!",
+      "options": []
     }
   }
+}

@@ -30,21 +30,25 @@ O arquivo `jsonTest.json` deve seguir esta estrutura básica:
      {"text": "Ir para o fluxo A", "next": "fluxoA"},
      {"text": "Ir para o fluxo B", "next": "fluxoB"}
    ],
+    "dynamicOptions":{},
     "isDynamic":false
  },
  "fluxoA": {
    "message": "Você está no fluxo A.",
    "options": [],
+   "dynamicOptions":{},
   "isDynamic":false
  },
  "fluxoB": {
    "message": "Você está no fluxo B.",
    "options": [],
+   "dynamicOptions":{},
    "isDynamic":false
  },
  "end": {
    "message": "Obrigado por usar nosso serviço!",
    "options": [],
+   "dynamicOptions":{},
    "isDynamic":false
  }
 }

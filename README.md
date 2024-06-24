@@ -10,7 +10,7 @@ Antes de iniciar, certifique-se de ter o Node.js instalado em seu ambiente. Alé
 
 ## Instalação
 1. **Clone o Repositório**
-- `git clone <url_do_repositorio>` e `cd <nome_do_projeto>`
+- `git clone https://github.com/joaoromaniello/poc-jsonChatbot.git` e `cd poc-jsonChatbot`
 
 2. **Instalar Dependências**
 - `npm install`

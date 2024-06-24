@@ -1,0 +1,126 @@
+{
+    "initialState": "welcome",
+    "states": {
+      "welcome": {
+        "id": "welcome",
+        "message": "Bem-vindo ao nosso Chat! Como posso ajudá-lo hoje?",
+        "options": [
+          {
+            "text": "Quero saber mais sobre o produto.",
+            "next": "productInfo"
+          },
+          {
+            "text": "Preciso de ajuda com um problema.",
+            "next": "support"
+          }
+        ]
+      },
+      "productInfo": {
+        "id": "productInfo",
+        "message": "Nosso produto é incrível! Ele ajuda você a fazer X, Y e Z. Deseja saber mais detalhes ou voltar ao início?",
+        "options": [
+          {
+            "text": "Mais detalhes, por favor.",
+            "next": "moreDetails"
+          },
+          {
+            "text": "Voltar ao início.",
+            "next": "welcome"
+          }
+        ]
+      },
+      "support": {
+        "id": "support",
+        "message": "Sinto muito que você esteja enfrentando problemas. Posso ajudá-lo com algo específico?",
+        "options": [
+          {
+            "text": "Sim, tenho um problema específico.",
+            "next": "specificProblem"
+          },
+          {
+            "text": "Não, só estava testando.",
+            "next": "welcome"
+          }
+        ]
+      },
+      "moreDetails": {
+        "id": "moreDetails",
+        "message": "Aqui estão mais detalhes sobre o produto... [detalhes]. Gostaria de fazer outra pergunta?",
+        "options": [
+          {
+            "text": "Sim, tenho outra pergunta.",
+            "next": "welcome"
+          },
+          {
+            "text": "Não, obrigado.",
+            "next": "end"
+          }
+        ]
+      },
+      "specificProblem": {
+        "id": "specificProblem",
+        "message": "Por favor, descreva seu problema ou escolha uma opção comum abaixo.",
+        "options": [
+          {
+            "text": "Problema com o login.",
+            "next": "loginProblem"
+          },
+          {
+            "text": "Problema com o pagamento.",
+            "next": "paymentProblem"
+          },
+          {
+            "text": "Outro.",
+            "next": "otherProblem"
+          }
+        ]
+      },
+      "loginProblem": {
+        "id": "loginProblem",
+        "message": "Para problemas de login, você pode tentar redefinir sua senha ou entrar em contato com o suporte. Precisa de mais ajuda?",
+        "options": [
+          {
+            "text": "Sim, preciso de mais ajuda.",
+            "next": "support"
+          },
+          {
+            "text": "Não, isso resolve.",
+            "next": "end"
+          }
+        ]
+      },
+      "paymentProblem": {
+        "id": "paymentProblem",
+        "message": "Para problemas de pagamento, verifique se seus dados estão corretos ou se sua conta tem saldo suficiente. Ainda precisa de ajuda?",
+        "options": [
+          {
+            "text": "Sim, ainda preciso de ajuda.",
+            "next": "support"
+          },
+          {
+            "text": "Não, vou verificar isso.",
+            "next": "end"
+          }
+        ]
+      },
+      "otherProblem": {
+        "id": "otherProblem",
+        "message": "Por favor, entre em contato com nosso suporte para descrever seu problema. Gostaria de voltar ao início ou encerrar o chat?",
+        "options": [
+          {
+            "text": "Voltar ao início.",
+            "next": "welcome"
+          },
+          {
+            "text": "Encerrar o chat.",
+            "next": "end"
+          }
+        ]
+      },
+      "end": {
+        "id": "end",
+        "message": "Obrigado por usar nosso chat. Tenha um ótimo dia!",
+        "options": []
+      }
+    }
+  }

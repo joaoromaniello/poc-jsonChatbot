@@ -1,0 +1,45 @@
+{
+    "initialState": "welcome",
+    "states": {
+      "welcome": {
+        "id": "welcome",
+        "message": "Ola O que voce gostaria?",
+        "options": [
+          {
+            "text": "Gostaria de ir para o fluxo A",
+            "next": "fluxA"
+          },
+          {
+            "text": "Gostaria de ir para o fluxo B",
+            "next": "fluxB"
+          }
+        ]
+      },
+      "fluxA": {
+        "id": "fluxA",
+        "message": "Ola... Voce esta no fluxo A;",
+        "options": [
+          {
+            "text": "Finalizar",
+            "next": "end"
+          }
+        ]
+      },
+      "fluxB": {
+        "id": "fluxB",
+        "message": "Ola... Voce esta no fluxo B;",
+        "options": [
+          {
+            "text": "Finalizar",
+            "next": "end"
+          }
+        ]
+      },
+
+      "end": {
+        "id": "end",
+        "message": "Obrigado por usar nosso chat. Tenha um ótimo dia!",
+        "options": []
+      }
+    }
+  }

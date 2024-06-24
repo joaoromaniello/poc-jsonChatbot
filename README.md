@@ -22,37 +22,68 @@ Antes de iniciar, certifique-se de ter o Node.js instalado em seu ambiente. Alé
 O arquivo `jsonTest.json` deve seguir esta estrutura básica:
 ```json
 {
-"initialState": "start",
-"states": {
- "start": {
-   "message": "Olá, o que você gostaria?",
-   "options": [
-     {"text": "Ir para o fluxo A", "next": "fluxoA"},
-     {"text": "Ir para o fluxo B", "next": "fluxoB"}
-   ],
-    "dynamicOptions":{},
-    "isDynamic":false
- },
- "fluxoA": {
-   "message": "Você está no fluxo A.",
-   "options": [],
-   "dynamicOptions":{},
-  "isDynamic":false
- },
- "fluxoB": {
-   "message": "Você está no fluxo B.",
-   "options": [],
-   "dynamicOptions":{},
-   "isDynamic":false
- },
- "end": {
-   "message": "Obrigado por usar nosso serviço!",
-   "options": [],
-   "dynamicOptions":{},
-   "isDynamic":false
- }
-}
-}
+    "initialState": "welcome",
+    "states": {
+      "welcome": {
+        "type":"baseMessage",
+        "id": "welcome",
+        "message": "Ola O que voce gostaria?",
+        "options": [
+          {
+            "text": "Gostaria de ir para o fluxo A",
+            "next": "fluxA"
+          },
+          {
+            "text": "Gostaria de ir para o fluxo B",
+            "next": "fluxB"
+          }
+        ],
+        "dynamicOptions":{
+        }
+      },
+      "fluxA": {
+        "type":"baseMessage",
+        "id": "fluxA",
+        "message": "Ola... Voce esta no fluxo A;",
+        "options": [
+          {
+            "text": "Finalizar",
+            "next": "end"
+          }
+        ],
+        "dynamicOptions":{
+
+        }
+      },
+      "fluxB": {
+        "type":"baseMessage",
+        "id": "fluxB",
+        "message": "Ola... Voce esta no fluxo B;",
+        "options": [
+          {
+            "text": "Finalizar",
+            "next": "end"
+          }
+        ],
+        "dynamicOptions":{
+
+        }
+      },
+      "end": {
+        "type":"baseMessage",
+        "id": "end",
+        "message": "Obrigado por usar nosso chat. Tenha um ótimo dia!",
+        "options": [],
+        "dynamicOptions":{
+          "field":"cnpj",
+          "json":"apiUrl.com/cnpj",
+          "template": "- CNPJ: {cnpj}",
+          "isRecursive": true
+        }
+      }
+    }
+  }
+
 
 ```
 

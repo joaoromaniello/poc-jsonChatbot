@@ -1,6 +1,6 @@
 const QRCODE = require('qrcode-terminal');
 const { Client } = require('whatsapp-web.js');
-const chatFlow = require('./Fluxes/jsonTest.json');
+const chatFlow = require('../Fluxes/jsonTest.json');
 
 const client = new Client();
 

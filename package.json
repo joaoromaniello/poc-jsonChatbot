@@ -4,8 +4,7 @@
   "description": "A poc of a chatbot that runs entirely using JSON.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "zap": "node messageSending.js",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

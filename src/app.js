@@ -3,16 +3,8 @@ const { Client } = require('whatsapp-web.js');
 const chatFlow = require('../Fluxes/jsonTest.json');
 
 const client = new Client();
-
-client.on('qr', (qr) => {
-    QRCODE.generate(qr, { small: true });
-});
-
-client.on('ready', () => {
-    console.log('Client is ready!');
-});
-
 let currentStateId = null;  
+
 
 async function sendMessage(message, chatId) {
     await client.sendMessage(chatId, message);
@@ -27,6 +19,16 @@ async function showState(stateId, chatId) {
     });
     await sendMessage(message, chatId);
 }
+
+
+client.on('qr', (qr) => {
+    QRCODE.generate(qr, { small: true });
+});
+
+client.on('ready', () => {
+    console.log('Client is ready!');
+});
+
 
 client.on('message', async msg => {
     if (!currentStateId || currentStateId === "end") {

@@ -2,6 +2,7 @@
     "initialState": "welcome",
     "states": {
       "welcome": {
+        "type":"baseMessage",
         "id": "welcome",
         "message": "Ola O que voce gostaria?",
         "options": [
@@ -13,9 +14,12 @@
             "text": "Gostaria de ir para o fluxo B",
             "next": "fluxB"
           }
-        ]
+        ],
+        "dynamicOptions":{
+        }
       },
       "fluxA": {
+        "type":"baseMessage",
         "id": "fluxA",
         "message": "Ola... Voce esta no fluxo A;",
         "options": [
@@ -23,9 +27,13 @@
             "text": "Finalizar",
             "next": "end"
           }
-        ]
+        ],
+        "dynamicOptions":{
+
+        }
       },
       "fluxB": {
+        "type":"baseMessage",
         "id": "fluxB",
         "message": "Ola... Voce esta no fluxo B;",
         "options": [
@@ -33,13 +41,22 @@
             "text": "Finalizar",
             "next": "end"
           }
-        ]
-      },
+        ],
+        "dynamicOptions":{
 
+        }
+      },
       "end": {
+        "type":"baseMessage",
         "id": "end",
         "message": "Obrigado por usar nosso chat. Tenha um ótimo dia!",
-        "options": []
+        "options": [],
+        "dynamicOptions":{
+          "field":"cnpj",
+          "json":"apiUrl.com/cnpj",
+          "template": "- CNPJ: {cnpj}",
+          "isRecursive": true
+        }
       }
     }
   }

@@ -5,18 +5,15 @@ Este projeto implementa um chatbot de WhatsApp que utiliza a biblioteca `whatsap
 
 ## Pré-requisitos
 Antes de iniciar, certifique-se de ter o Node.js instalado em seu ambiente. Além disso, você precisará do seguinte:
-- NPM ou Yarn para gerenciar as bibliotecas.
+- NPM  para gerenciar as bibliotecas.
 - WhatsApp no seu smartphone para escanear o QR code e conectar o bot.
 
 ## Instalação
 1. **Clone o Repositório**
-   
-git clone <url_do_repositorio>
-cd <nome_do_projeto>
+- `git clone <url_do_repositorio>` e `cd <nome_do_projeto>`
 
 2. **Instalar Dependências**
-npm install
-
+- `npm install`
 
 3. **Configuração**
 - Adicione o arquivo `jsonTest.json` na raiz do projeto. Este arquivo contém os estados do fluxo de conversa.

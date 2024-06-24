@@ -16,7 +16,7 @@ Antes de iniciar, certifique-se de ter o Node.js instalado em seu ambiente. Alé
 - `npm install`
 
 3. **Configuração**
-- Adicione o arquivo `jsonTest.json` na raiz do projeto. Este arquivo contém os estados do fluxo de conversa.
+- Adicione o arquivo `jsonTest.json` na pasta Fluxes. Este arquivo contém os estados do fluxo de conversa.
 
 ## Configuração do JSON de Fluxos
 O arquivo `jsonTest.json` deve seguir esta estrutura básica:

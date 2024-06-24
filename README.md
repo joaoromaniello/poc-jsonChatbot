@@ -49,7 +49,7 @@ O arquivo `jsonTest.json` deve seguir esta estrutura básica:
 ```
 
 ## **Uso**
--Para iniciar o chatbot:
-  node app.js
--Um QR Code será gerado no terminal. Use o WhatsApp em seu telefone para escanear o QR Code e estabelecer a conexão.
--O bot responderá automaticamente às mensagens recebidas conforme definido no arquivo JSON.
+- Para iniciar o chatbot:
+  `node app.js`
+- Um QR Code será gerado no terminal. Use o WhatsApp em seu telefone para escanear o QR Code e estabelecer a conexão.
+- O bot responderá automaticamente às mensagens recebidas conforme definido no arquivo JSON.

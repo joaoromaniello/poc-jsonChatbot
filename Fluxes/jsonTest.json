@@ -67,12 +67,26 @@
         "id": "dynamicFlux",
         "options": [
           {
-            "next": "fluxB"
+            "next": "dajsd"
           }
         ],
         "dynamicOptions":{
           "url":"https://85314db9330548538cdb9b383d1b51b3.api.mockbin.io/",
           "isRecursive": false
+        }
+      },
+      "error": {
+        "type":"iterationMenu",
+        "id": "error",
+        "message": "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        "options": [
+          {
+            "text": "Tentar novamente",
+            "next": "welcome"
+          }
+        ],
+        "dynamicOptions":{
+
         }
       }
     }

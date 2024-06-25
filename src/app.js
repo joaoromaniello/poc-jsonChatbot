@@ -41,22 +41,27 @@ async function processApiCall(state, chatId) {
     console.error("Erro ao acessar a API:", error);
   }
 }
-
 async function showState(stateId, chatId) {
-
   await setUser(chatId, JSON.stringify({ currentStateId: stateId }));
   const state = chatFlow.states[stateId];
 
-  switch (state.type) {
+  switch (state?.type ?? "undefinedState") {
     case "iterationMenu":
       await sendBaseMessage(state, chatId);
       break;
     case "apiCall":
       await processApiCall(state, chatId);
       break;
+    case "undefinedState":
+      await setUser(chatId, JSON.stringify({ currentStateId: "error" }));
+      await sendBaseMessage(chatFlow.states["error"], chatId);
+      break;
     default:
+      await sendMessage("Algo inesperado aconteceu.", chatId);
+      break;
   }
 }
+
 
 function fillTemplateWithData(template, data) {
   return template.replace(/\{(\w+)\}/g, (match, key) => data[key] || match);
@@ -101,7 +106,7 @@ client.on("message", async (msg) => {
     return;
   }
 
-  switch (currentState.type) {
+  switch (currentState?.type ?? "undefinedState") {
     case "iterationMenu":
       if (choiceIndex >= 0 && choiceIndex < currentState.options.length) {
         const nextStateId = currentState.options[choiceIndex].next;
@@ -116,9 +121,17 @@ client.on("message", async (msg) => {
         await showState(user.currentStateId, msg.from);
       }
       break;
-    
-
+  
+    case "undefinedState":
+      await showState("error", msg.from);
+      break;
+  
+    default:
+      await sendMessage("Houve um erro inesperado. Por favor, tente novamente.", msg.from);
+      await showState(user.currentStateId, msg.from);
+      break;
   }
+
 
   user = await getUser(msg.from);
 

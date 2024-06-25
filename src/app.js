@@ -1,9 +1,14 @@
 const QRCODE = require("qrcode-terminal");
-const { Client } = require("whatsapp-web.js");
+const { Client,LocalAuth } = require("whatsapp-web.js");
 const chatFlow = require("../Fluxes/jsonTest.json");
 const redis = require("redis");
 
-const client = new Client();
+const client = new Client({
+  authStrategy: new LocalAuth({
+    dataPath: 'autenticationFolder'
+  })
+})
+
 const redisClient = redis.createClient({
   URL: process.env.REDIS_URL || "redis://localhost:6379",
 });
@@ -28,6 +33,9 @@ async function processApiCall(state, chatId) {
   try {
     const response = await fetch(state.dynamicOptions.url);
     const data = await response.json();
+
+    await updateUserWithData(chatId, data);
+
     if (state.dynamicOptions.template) {
       const filledTemplate = fillTemplateWithData(
         state.dynamicOptions.template,
@@ -41,8 +49,38 @@ async function processApiCall(state, chatId) {
     console.error("Erro ao acessar a API:", error);
   }
 }
+
+async function updateUserWithData(chatId, data) {
+  const userKey = `user:${chatId}`;
+  let user = await redisClient.get(userKey);
+  user = user ? JSON.parse(user) : { params: {} };  
+
+
+  Object.assign(user.params, data);
+
+  await redisClient.set(userKey, JSON.stringify(user));
+}
+
+async function getUserData(id, paramName) {
+  const userKey = `user:${id}`;
+  let user = await redisClient.get(userKey);
+
+  if (!user) {
+    console.log("Usuário não encontrado.");
+    return null;  
+  }
+
+  user = JSON.parse(user); 
+  if (user.params && user.params.hasOwnProperty(paramName)) {
+    return user.params[paramName];  
+  } else {
+    console.log(`Parâmetro '${paramName}' não encontrado para o usuário.`);
+    return null;  
+  }
+}
+
 async function showState(stateId, chatId) {
-  await setUser(chatId, JSON.stringify({ currentStateId: stateId }));
+  await setUser(chatId, {currentStateId: stateId} );
   const state = chatFlow.states[stateId];
 
   switch (state?.type ?? "undefinedState") {
@@ -53,7 +91,7 @@ async function showState(stateId, chatId) {
       await processApiCall(state, chatId);
       break;
     case "undefinedState":
-      await setUser(chatId, JSON.stringify({ currentStateId: "error" }));
+      await setUser(chatId,  {currentStateId: "error"});
       await sendBaseMessage(chatFlow.states["error"], chatId);
       break;
     default:
@@ -62,17 +100,29 @@ async function showState(stateId, chatId) {
   }
 }
 
-
 function fillTemplateWithData(template, data) {
   return template.replace(/\{(\w+)\}/g, (match, key) => data[key] || match);
 }
 
-async function setUser(id, value) {
-  await redisClient.set(`user:${id}`, value);
+async function setUser(id, userObject) {
+  const userKey = `user:${id}`;
+  let currentValue = await redisClient.get(userKey);
+  
+  if (!currentValue) {
+    currentValue = {}; 
+  } else {
+    currentValue = JSON.parse(currentValue); 
+  }
+
+
+  Object.assign(currentValue, userObject);
+
+  await redisClient.set(userKey, JSON.stringify(currentValue));
 }
 
 async function getUser(id) {
-  return JSON.parse(await redisClient.get(`user:${id}`));
+  const userData = await redisClient.get(`user:${id}`);
+  return userData ? JSON.parse(userData) : null;
 }
 
 async function deleteUser(id) {
@@ -88,16 +138,18 @@ client.on("ready", () => {
 });
 
 client.on("message", async (msg) => {
-  if ((await getUser(msg.from)) === null) {
-    setUser(msg.from, JSON.stringify({ currentStateId: null, params: {} }));
-  }
-
   let user = await getUser(msg.from);
-  let currentState = chatFlow.states[user.currentStateId];
+
+  if (!user) {
+    user = { currentStateId: null, params: {} };
+    await setUser(msg.from, user);
+  }
 
   console.log(
     `Received message from ${msg.from}: ${msg.body} - Current state: ${user.currentStateId}`
   );
+
+  let currentState = chatFlow.states[user.currentStateId];
   const message = msg.body.trim();
   const choiceIndex = parseInt(message, 10) - 1;
 
@@ -110,36 +162,34 @@ client.on("message", async (msg) => {
     case "iterationMenu":
       if (choiceIndex >= 0 && choiceIndex < currentState.options.length) {
         const nextStateId = currentState.options[choiceIndex].next;
-        const nextState = chatFlow.states[nextStateId];
+        user.currentStateId = nextStateId;  
+        await setUser(msg.from, user);
+
         await showState(nextStateId, msg.from);
-  
-        if (nextState.type == "apiCall") {
-          await showState(nextState.options[0].next, msg.from);
+        if (chatFlow.states[nextStateId].type == "apiCall") {
+          await showState(chatFlow.states[nextStateId].options[0].next, msg.from);
         }
       } else {
         await sendMessage("Opção inválida. Tente novamente.", msg.from);
         await showState(user.currentStateId, msg.from);
       }
       break;
-  
+
     case "undefinedState":
       await showState("error", msg.from);
       break;
-  
+
     default:
       await sendMessage("Houve um erro inesperado. Por favor, tente novamente.", msg.from);
       await showState(user.currentStateId, msg.from);
       break;
   }
 
-
-  user = await getUser(msg.from);
+  user = await getUser(msg.from);  
 
   if (user.currentStateId === "end") {
     await deleteUser(msg.from);
-    return;
   }
 });
-
 
 client.initialize();

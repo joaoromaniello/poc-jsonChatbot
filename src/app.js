@@ -1,24 +1,26 @@
 const QRCODE = require("qrcode-terminal");
 const { Client } = require("whatsapp-web.js");
 const chatFlow = require("../Fluxes/jsonComplexFlux.json");
-const redis = require('redis');
+const redis = require("redis");
 
 const client = new Client();
 const redisClient = redis.createClient({
-  URL: process.env.REDIS_URL || 'redis://localhost:6379'
+  URL: process.env.REDIS_URL || "redis://localhost:6379",
 });
 
 redisClient.connect();
 
-redisClient.on('connect', () => console.log('Connected to Redis!'));
+redisClient.on("connect", () => console.log("Connected to Redis!"));
 
 async function sendMessage(message, chatId) {
   await client.sendMessage(chatId, message);
 }
 
-function showState(stateId, chatId) {
+async function showState(stateId, chatId) {
   console.log("Sending msg to user using: " + stateId + "\n");
-  currentStateId = stateId;
+  console.log("antes", await getUser(chatId));
+  setUser(chatId, JSON.stringify({ currentStateId: stateId }));
+  console.log("depois", await getUser(chatId));
   const state = chatFlow.states[stateId];
   let message;
 
@@ -28,35 +30,31 @@ function showState(stateId, chatId) {
       message += `\n*${index + 1}*. ${option.text}`;
     });
     console.log("Sending message: " + message + "\n");
-    return sendMessage(message, chatId); 
+    return sendMessage(message, chatId);
   } else if (state.type == "apiCall") {
-
     //Caso tiver template message...
-    if(state.dynamicOptions.template){
+    if (state.dynamicOptions.template) {
       return fetch(state.dynamicOptions.url)
-      .then(response => response.json())
-      .then(data => {
-        const template = state.dynamicOptions.template;
-        const filledTemplate = fillTemplateWithData(template, data);
-        return sendMessage(filledTemplate, chatId); 
-      })
-      .catch(error => {
-        console.error('Erro ao acessar a API:', error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          const template = state.dynamicOptions.template;
+          const filledTemplate = fillTemplateWithData(template, data);
+          return sendMessage(filledTemplate, chatId);
+        })
+        .catch((error) => {
+          console.error("Erro ao acessar a API:", error);
+        });
     }
 
     return fetch(state.dynamicOptions.url)
-    .then(response => response.json())
-    .then(data => {
-      console.log("Data: ", data);
-      return;
-    })
-    .catch(error => {
-      console.error('Erro ao acessar a API:', error);
-    });
-
-
-
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Data: ", data);
+        return;
+      })
+      .catch((error) => {
+        console.error("Erro ao acessar a API:", error);
+      });
   }
 }
 
@@ -72,43 +70,29 @@ client.on("ready", () => {
   console.log("Client is ready!");
 });
 
-function createUser(id) {
-  redisClient.set(id, JSON.stringify({ currentStateId: null }));
-  // redisClient.set(id, JSON.stringify({ currentStateId: chatFlow.initialState }));
+async function setUser(id, value) {
+  await redisClient.set(`user:${id}`, value);
 }
 
-function getUser(id) {
-  return new Promise((resolve, reject) => {
-    redisClient.get(id, (err, reply) => {
-      if (err) {
-        reject(err);
-      } else if (reply === null) {
-        // Se a chave não existir, reply será null
-        createUser(id);
-        // Após criar o usuário, busca novamente para garantir que agora existe
-        redisClient.get(id, (err, newUserReply) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(JSON.parse(newUserReply));
-          }
-        });
-      } else {
-        // Se a chave existir, processa a resposta
-        resolve(JSON.parse(reply));
-      }
-    });
-  });
+async function getUser(id) {
+  return JSON.parse(await redisClient.get(`user:${id}`));
 }
 
 client.on("message", async (msg) => {
+  if (await getUser(msg.from) === null) {
+    console.log("não encontrou")
+    setUser(msg.from, JSON.stringify({ currentStateId: null }));
+  }
 
-  const currentState = getUser(msg.from).currentStateId;
+  let user = await getUser(msg.from)
+  console.log(user);
+
+  let currentState = chatFlow.states[user.currentStateId];
+
   console.log(`Received message from ${msg.from}: ${msg.body}`);
   console.log(currentState);
   const message = msg.body.trim();
   const choiceIndex = parseInt(message, 10) - 1;
-
 
   if (!currentState || currentState === "end") {
     currentState = chatFlow.initialState;
@@ -116,15 +100,25 @@ client.on("message", async (msg) => {
     return;
   }
 
-  if (currentState.type == "baseMessage" && choiceIndex >= 0 && choiceIndex < currentState.options.length) {
+  console.log(currentState)
+
+  if (
+    currentState.type == "baseMessage" &&
+    choiceIndex >= 0 &&
+    choiceIndex < currentState.options.length
+  ) {
+    console.log("entrou aqui")
     const nextStateId = currentState.options[choiceIndex].next;
     const nextState = chatFlow.states[nextStateId];
-    await showState(nextStateId, msg.from);  
-  
+    await showState(nextStateId, msg.from);
+
     if (nextState.type == "apiCall") {
-      await showState(nextState.options[0].next, msg.from);  
+      await showState(nextState.options[0].next, msg.from);
     }
-  } else if (currentState.type == "baseMessage" && (choiceIndex < 0 || choiceIndex >= currentState.options.length)) {
+  } else if (
+    currentState.type == "baseMessage" &&
+    (choiceIndex < 0 || choiceIndex >= currentState.options.length)
+  ) {
     await sendMessage("Opção inválida. Tente novamente.", msg.from);
     await showState(currentState, msg.from);
   }

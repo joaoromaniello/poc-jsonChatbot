@@ -2,7 +2,7 @@
     "initialState": "welcome",
     "states": {
       "welcome": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "welcome",
         "message": "Olá! Bem-vindo ao nosso chat sobre Inteligência Artificial. O que gostaria de aprender hoje?",
         "options": [
@@ -22,7 +22,7 @@
         "dynamicOptions": {}
       },
       "applications": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "applications",
         "message": "A IA tem várias aplicações, como saúde, finanças, e tecnologia. O que mais te interessa?",
         "options": [
@@ -46,7 +46,7 @@
         "dynamicOptions": {}
       },
       "ethics": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "ethics",
         "message": "Ética em IA é crucial para garantir que a tecnologia seja usada para o bem. Quer saber sobre quais aspectos?",
         "options": [
@@ -66,7 +66,7 @@
         "dynamicOptions": {}
       },
       "machineLearning": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "machineLearning",
         "message": "Aprendizado de máquina é o coração da IA moderna. Qual tópico você gostaria de explorar?",
         "options": [
@@ -86,7 +86,7 @@
         "dynamicOptions": {}
       },
       "health": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "health",
         "message": "IA na saúde pode revolucionar diagnósticos e tratamentos. Quer saber mais sobre algum tópico específico ou voltar?",
         "options": [
@@ -106,7 +106,7 @@
         "dynamicOptions": {}
       },
       "finance": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "finance",
         "message": "IA em finanças ajuda na análise de riscos e automação de tarefas. Quer explorar mais ou voltar?",
         "options": [
@@ -126,7 +126,7 @@
         "dynamicOptions": {}
       },
       "technology": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "technology",
         "message": "Tecnologia e IA estão intimamente ligadas. Quais avanços você gostaria de entender melhor?",
         "options": [
@@ -146,7 +146,7 @@
         "dynamicOptions": {}
       },
       "end": {
-        "type": "baseMessage",
+        "type": "iterationMenu",
         "id": "end",
         "message": "Obrigado por usar nosso chat sobre Inteligência Artificial. Esperamos que tenha aprendido algo novo. Até a próxima!",
         "options": [],

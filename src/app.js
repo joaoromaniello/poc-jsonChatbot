@@ -21,7 +21,6 @@ async function sendBaseMessage(state, chatId) {
   state.options.forEach((option, index) => {
     message += `\n*${index + 1}*. ${option.text}`;
   });
-  console.log("Sending message: " + message + "\n");
   await sendMessage(message, chatId);
 }
 
@@ -44,19 +43,18 @@ async function processApiCall(state, chatId) {
 }
 
 async function showState(stateId, chatId) {
-  console.log("Sending msg to user using: " + stateId + "\n");
+
   await setUser(chatId, JSON.stringify({ currentStateId: stateId }));
   const state = chatFlow.states[stateId];
 
   switch (state.type) {
-    case "baseMessage":
+    case "iterationMenu":
       await sendBaseMessage(state, chatId);
       break;
     case "apiCall":
       await processApiCall(state, chatId);
       break;
     default:
-      console.log("Unknown state type:", state.type);
   }
 }
 
@@ -84,10 +82,8 @@ client.on("ready", () => {
   console.log("Client is ready!");
 });
 
-
 client.on("message", async (msg) => {
   if ((await getUser(msg.from)) === null) {
-    console.log("criando de novo");
     setUser(msg.from, JSON.stringify({ currentStateId: null, params: {} }));
   }
 
@@ -105,35 +101,32 @@ client.on("message", async (msg) => {
     return;
   }
 
-  if (
-    currentState.type == "baseMessage" &&
-    choiceIndex >= 0 &&
-    choiceIndex < currentState.options.length
-  ) {
-    const nextStateId = currentState.options[choiceIndex].next;
-    const nextState = chatFlow.states[nextStateId];
-    await showState(nextStateId, msg.from);
+  switch (currentState.type) {
+    case "iterationMenu":
+      if (choiceIndex >= 0 && choiceIndex < currentState.options.length) {
+        const nextStateId = currentState.options[choiceIndex].next;
+        const nextState = chatFlow.states[nextStateId];
+        await showState(nextStateId, msg.from);
+  
+        if (nextState.type == "apiCall") {
+          await showState(nextState.options[0].next, msg.from);
+        }
+      } else {
+        await sendMessage("Opção inválida. Tente novamente.", msg.from);
+        await showState(user.currentStateId, msg.from);
+      }
+      break;
+    
 
-    if (nextState.type == "apiCall") {
-      await showState(nextState.options[0].next, msg.from);
-    }
-  } else if (
-    currentState.type == "baseMessage" &&
-    (choiceIndex < 0 || choiceIndex >= currentState.options.length)
-  ) {
-    await sendMessage("Opção inválida. Tente novamente.", msg.from);
-    await showState(user.currentStateId, msg.from);
   }
 
   user = await getUser(msg.from);
-  console.log("novo user", user);
 
   if (user.currentStateId === "end") {
     await deleteUser(msg.from);
     return;
   }
 });
-
 
 
 client.initialize();

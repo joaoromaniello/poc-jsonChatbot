@@ -25,7 +25,7 @@ O arquivo `jsonTest.json` deve seguir esta estrutura básica:
     "initialState": "welcome",
     "states": {
       "welcome": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "welcome",
         "message": "Ola O que voce gostaria?",
         "options": [
@@ -42,7 +42,7 @@ O arquivo `jsonTest.json` deve seguir esta estrutura básica:
         }
       },
       "fluxA": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "fluxA",
         "message": "Ola... Voce esta no fluxo A;",
         "options": [
@@ -56,7 +56,7 @@ O arquivo `jsonTest.json` deve seguir esta estrutura básica:
         }
       },
       "fluxB": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "fluxB",
         "message": "Ola... Voce esta no fluxo B;",
         "options": [
@@ -70,7 +70,7 @@ O arquivo `jsonTest.json` deve seguir esta estrutura básica:
         }
       },
       "end": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "end",
         "message": "Obrigado por usar nosso chat. Tenha um ótimo dia!",
         "options": [],

@@ -2,7 +2,7 @@
     "initialState": "welcome",
     "states": {
       "welcome": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "welcome",
         "message": "Ola O que voce gostaria?",
         "options": [
@@ -23,7 +23,7 @@
         }
       },
       "fluxA": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "fluxA",
         "message": "Ola... Voce esta no fluxo A;",
         "options": [
@@ -37,7 +37,7 @@
         }
       },
       "fluxB": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "fluxB",
         "message": "Ola... Voce esta no fluxo B;",
         "options": [
@@ -51,7 +51,7 @@
         }
       },
       "end": {
-        "type":"baseMessage",
+        "type":"iterationMenu",
         "id": "end",
         "message": "Obrigado por usar nosso chat. Tenha um ótimo dia!",
         "options": [],

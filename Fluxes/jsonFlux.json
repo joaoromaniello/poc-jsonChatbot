@@ -2,7 +2,7 @@
   "initialState": "welcome",
   "states": {
     "welcome": {
-      "type": "baseMessage",
+      "type": "iterationMenu",
       "id": "welcome",
       "message": "Olá! O que você gostaria de fazer hoje?",
       "options": [
@@ -41,7 +41,7 @@
       ]
     },
     "backOrEnd": {
-      "type": "baseMessage",
+      "type": "iterationMenu",
       "id": "backOrEnd",
       "message": "Deseja fazer mais alguma coisa?",
       "options": [
@@ -56,7 +56,7 @@
       ]
     },
     "end": {
-      "type": "baseMessage",
+      "type": "iterationMenu",
       "id": "end",
       "message": "Obrigado por usar nosso serviço. Até mais!",
       "options": []

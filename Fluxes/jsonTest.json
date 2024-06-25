@@ -13,6 +13,10 @@
           {
             "text": "Gostaria de ir para o fluxo B",
             "next": "fluxB"
+          },
+          {
+            "text": "Gostaria de ir para o fluxo dinamico!!",
+            "next": "dynamicFlux"
           }
         ],
         "dynamicOptions":{
@@ -56,6 +60,19 @@
           "json":"apiUrl.com/cnpj",
           "template": "- CNPJ: {cnpj}",
           "isRecursive": true
+        }
+      },
+      "dynamicFlux": {
+        "type":"apiCall",
+        "id": "dynamicFlux",
+        "options": [
+          {
+            "next": "fluxB"
+          }
+        ],
+        "dynamicOptions":{
+          "url":"https://85314db9330548538cdb9b383d1b51b3.api.mockbin.io/",
+          "isRecursive": false
         }
       }
     }

@@ -1,0 +1,157 @@
+{
+    "initialState": "welcome",
+    "states": {
+      "welcome": {
+        "type": "baseMessage",
+        "id": "welcome",
+        "message": "Olá! Bem-vindo ao nosso chat sobre Inteligência Artificial. O que gostaria de aprender hoje?",
+        "options": [
+          {
+            "text": "Aplicações de IA",
+            "next": "applications"
+          },
+          {
+            "text": "Ética em IA",
+            "next": "ethics"
+          },
+          {
+            "text": "Aprendizado de Máquina",
+            "next": "machineLearning"
+          }
+        ],
+        "dynamicOptions": {}
+      },
+      "applications": {
+        "type": "baseMessage",
+        "id": "applications",
+        "message": "A IA tem várias aplicações, como saúde, finanças, e tecnologia. O que mais te interessa?",
+        "options": [
+          {
+            "text": "Saúde",
+            "next": "health"
+          },
+          {
+            "text": "Finanças",
+            "next": "finance"
+          },
+          {
+            "text": "Tecnologia",
+            "next": "technology"
+          },
+          {
+            "text": "Voltar",
+            "next": "welcome"
+          }
+        ],
+        "dynamicOptions": {}
+      },
+      "ethics": {
+        "type": "baseMessage",
+        "id": "ethics",
+        "message": "Ética em IA é crucial para garantir que a tecnologia seja usada para o bem. Quer saber sobre quais aspectos?",
+        "options": [
+          {
+            "text": "Viés e discriminação",
+            "next": "bias"
+          },
+          {
+            "text": "Privacidade e vigilância",
+            "next": "privacy"
+          },
+          {
+            "text": "Voltar",
+            "next": "welcome"
+          }
+        ],
+        "dynamicOptions": {}
+      },
+      "machineLearning": {
+        "type": "baseMessage",
+        "id": "machineLearning",
+        "message": "Aprendizado de máquina é o coração da IA moderna. Qual tópico você gostaria de explorar?",
+        "options": [
+          {
+            "text": "Redes Neurais",
+            "next": "neuralNetworks"
+          },
+          {
+            "text": "Algoritmos de Aprendizado",
+            "next": "learningAlgorithms"
+          },
+          {
+            "text": "Voltar",
+            "next": "welcome"
+          }
+        ],
+        "dynamicOptions": {}
+      },
+      "health": {
+        "type": "baseMessage",
+        "id": "health",
+        "message": "IA na saúde pode revolucionar diagnósticos e tratamentos. Quer saber mais sobre algum tópico específico ou voltar?",
+        "options": [
+          {
+            "text": "Diagnósticos",
+            "next": "diagnostics"
+          },
+          {
+            "text": "Tratamentos",
+            "next": "treatments"
+          },
+          {
+            "text": "Voltar",
+            "next": "applications"
+          }
+        ],
+        "dynamicOptions": {}
+      },
+      "finance": {
+        "type": "baseMessage",
+        "id": "finance",
+        "message": "IA em finanças ajuda na análise de riscos e automação de tarefas. Quer explorar mais ou voltar?",
+        "options": [
+          {
+            "text": "Análise de Riscos",
+            "next": "riskAnalysis"
+          },
+          {
+            "text": "Automação",
+            "next": "automation"
+          },
+          {
+            "text": "Voltar",
+            "next": "applications"
+          }
+        ],
+        "dynamicOptions": {}
+      },
+      "technology": {
+        "type": "baseMessage",
+        "id": "technology",
+        "message": "Tecnologia e IA estão intimamente ligadas. Quais avanços você gostaria de entender melhor?",
+        "options": [
+          {
+            "text": "Robótica",
+            "next": "robotics"
+          },
+          {
+            "text": "Processamento de Linguagem Natural",
+            "next": "nlp"
+          },
+          {
+            "text": "Voltar",
+            "next": "applications"
+          }
+        ],
+        "dynamicOptions": {}
+      },
+      "end": {
+        "type": "baseMessage",
+        "id": "end",
+        "message": "Obrigado por usar nosso chat sobre Inteligência Artificial. Esperamos que tenha aprendido algo novo. Até a próxima!",
+        "options": [],
+        "dynamicOptions": {}
+      }
+    }
+  }
+  

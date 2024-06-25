@@ -16,43 +16,47 @@ async function sendMessage(message, chatId) {
   await client.sendMessage(chatId, message);
 }
 
+async function sendBaseMessage(state, chatId) {
+  let message = state.message + "\n";
+  state.options.forEach((option, index) => {
+    message += `\n*${index + 1}*. ${option.text}`;
+  });
+  console.log("Sending message: " + message + "\n");
+  await sendMessage(message, chatId);
+}
+
+async function processApiCall(state, chatId) {
+  try {
+    const response = await fetch(state.dynamicOptions.url);
+    const data = await response.json();
+    if (state.dynamicOptions.template) {
+      const filledTemplate = fillTemplateWithData(
+        state.dynamicOptions.template,
+        data
+      );
+      await sendMessage(filledTemplate, chatId);
+    } else {
+      console.log("Data: ", data);
+    }
+  } catch (error) {
+    console.error("Erro ao acessar a API:", error);
+  }
+}
+
 async function showState(stateId, chatId) {
   console.log("Sending msg to user using: " + stateId + "\n");
-  setUser(chatId, JSON.stringify({ currentStateId: stateId }));
+  await setUser(chatId, JSON.stringify({ currentStateId: stateId }));
   const state = chatFlow.states[stateId];
-  let message;
 
-  if (state.type == "baseMessage") {
-    message = state.message + "\n";
-    state.options.forEach((option, index) => {
-      message += `\n*${index + 1}*. ${option.text}`;
-    });
-    console.log("Sending message: " + message + "\n");
-    return sendMessage(message, chatId);
-  } else if (state.type == "apiCall") {
-    //Caso tiver template message...
-    if (state.dynamicOptions.template) {
-      return fetch(state.dynamicOptions.url)
-        .then((response) => response.json())
-        .then((data) => {
-          const template = state.dynamicOptions.template;
-          const filledTemplate = fillTemplateWithData(template, data);
-          return sendMessage(filledTemplate, chatId);
-        })
-        .catch((error) => {
-          console.error("Erro ao acessar a API:", error);
-        });
-    }
-
-    return fetch(state.dynamicOptions.url)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Data: ", data);
-        return;
-      })
-      .catch((error) => {
-        console.error("Erro ao acessar a API:", error);
-      });
+  switch (state.type) {
+    case "baseMessage":
+      await sendBaseMessage(state, chatId);
+      break;
+    case "apiCall":
+      await processApiCall(state, chatId);
+      break;
+    default:
+      console.log("Unknown state type:", state.type);
   }
 }
 

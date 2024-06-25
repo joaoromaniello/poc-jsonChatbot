@@ -1,9 +1,16 @@
 const QRCODE = require("qrcode-terminal");
 const { Client } = require("whatsapp-web.js");
 const chatFlow = require("../Fluxes/jsonComplexFlux.json");
+const redis = require('redis');
 
 const client = new Client();
-let currentStateId = null;
+const redisClient = redis.createClient({
+  URL: process.env.REDIS_URL || 'redis://localhost:6379'
+});
+
+redisClient.connect();
+
+redisClient.on('connect', () => console.log('Connected to Redis!'));
 
 async function sendMessage(message, chatId) {
   await client.sendMessage(chatId, message);
@@ -65,15 +72,47 @@ client.on("ready", () => {
   console.log("Client is ready!");
 });
 
+function createUser(id) {
+  redisClient.set(id, JSON.stringify({ currentStateId: null }));
+  // redisClient.set(id, JSON.stringify({ currentStateId: chatFlow.initialState }));
+}
+
+function getUser(id) {
+  return new Promise((resolve, reject) => {
+    redisClient.get(id, (err, reply) => {
+      if (err) {
+        reject(err);
+      } else if (reply === null) {
+        // Se a chave não existir, reply será null
+        createUser(id);
+        // Após criar o usuário, busca novamente para garantir que agora existe
+        redisClient.get(id, (err, newUserReply) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(JSON.parse(newUserReply));
+          }
+        });
+      } else {
+        // Se a chave existir, processa a resposta
+        resolve(JSON.parse(reply));
+      }
+    });
+  });
+}
+
 client.on("message", async (msg) => {
-  const currentState = chatFlow.states[currentStateId];
+
+  const currentState = getUser(msg.from).currentStateId;
+  console.log(`Received message from ${msg.from}: ${msg.body}`);
+  console.log(currentState);
   const message = msg.body.trim();
   const choiceIndex = parseInt(message, 10) - 1;
 
 
-  if (!currentStateId || currentStateId === "end") {
-    currentStateId = chatFlow.initialState;
-    await showState(currentStateId, msg.from);
+  if (!currentState || currentState === "end") {
+    currentState = chatFlow.initialState;
+    await showState(currentState, msg.from);
     return;
   }
 
@@ -87,7 +126,7 @@ client.on("message", async (msg) => {
     }
   } else if (currentState.type == "baseMessage" && (choiceIndex < 0 || choiceIndex >= currentState.options.length)) {
     await sendMessage("Opção inválida. Tente novamente.", msg.from);
-    await showState(currentStateId, msg.from);
+    await showState(currentState, msg.from);
   }
 });
 

@@ -64,14 +64,6 @@ function fillTemplateWithData(template, data) {
   return template.replace(/\{(\w+)\}/g, (match, key) => data[key] || match);
 }
 
-client.on("qr", (qr) => {
-  QRCODE.generate(qr, { small: true });
-});
-
-client.on("ready", () => {
-  console.log("Client is ready!");
-});
-
 async function setUser(id, value) {
   await redisClient.set(`user:${id}`, value);
 }
@@ -83,6 +75,15 @@ async function getUser(id) {
 async function deleteUser(id) {
   await redisClient.del(`user:${id}`);
 }
+
+client.on("qr", (qr) => {
+  QRCODE.generate(qr, { small: true });
+});
+
+client.on("ready", () => {
+  console.log("Client is ready!");
+});
+
 
 client.on("message", async (msg) => {
   if ((await getUser(msg.from)) === null) {
@@ -132,5 +133,7 @@ client.on("message", async (msg) => {
     return;
   }
 });
+
+
 
 client.initialize();

@@ -12,7 +12,7 @@
           },
           {
             "text": "Gostaria de ir para o fluxo B",
-            "next": "fluxB"
+            "next": "xZcxz"
           },
           {
             "text": "Gostaria de ir para o fluxo dinamico!!",
@@ -67,7 +67,7 @@
         "id": "dynamicFlux",
         "options": [
           {
-            "next": "fluxB"
+            "next": "dasda"
           }
         ],
         "dynamicOptions":{

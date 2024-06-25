@@ -50,34 +50,6 @@ async function processApiCall(state, chatId) {
   }
 }
 
-async function updateUserWithData(chatId, data) {
-  const userKey = `user:${chatId}`;
-  let user = await redisClient.get(userKey);
-  user = user ? JSON.parse(user) : { params: {} };  
-
-
-  Object.assign(user.params, data);
-
-  await redisClient.set(userKey, JSON.stringify(user));
-}
-
-async function getUserData(id, paramName) {
-  const userKey = `user:${id}`;
-  let user = await redisClient.get(userKey);
-
-  if (!user) {
-    console.log("Usuário não encontrado.");
-    return null;  
-  }
-
-  user = JSON.parse(user); 
-  if (user.params && user.params.hasOwnProperty(paramName)) {
-    return user.params[paramName];  
-  } else {
-    console.log(`Parâmetro '${paramName}' não encontrado para o usuário.`);
-    return null;  
-  }
-}
 
 async function showState(stateId, chatId) {
   await setUser(chatId, {currentStateId: stateId} );
@@ -129,6 +101,36 @@ async function deleteUser(id) {
   await redisClient.del(`user:${id}`);
 }
 
+async function updateUserWithData(chatId, data) {
+  const userKey = `user:${chatId}`;
+  let user = await redisClient.get(userKey);
+  user = user ? JSON.parse(user) : { params: {} };  
+
+
+  Object.assign(user.params, data);
+
+  await redisClient.set(userKey, JSON.stringify(user));
+}
+
+async function getUserData(id, paramName) {
+  const userKey = `user:${id}`;
+  let user = await redisClient.get(userKey);
+
+  if (!user) {
+    console.log("Usuário não encontrado.");
+    return null;  
+  }
+
+  user = JSON.parse(user); 
+  if (user.params && user.params.hasOwnProperty(paramName)) {
+    return user.params[paramName];  
+  } else {
+    console.log(`Parâmetro '${paramName}' não encontrado para o usuário.`);
+    return null;  
+  }
+}
+
+
 client.on("qr", (qr) => {
   QRCODE.generate(qr, { small: true });
 });
@@ -166,7 +168,7 @@ client.on("message", async (msg) => {
         await setUser(msg.from, user);
 
         await showState(nextStateId, msg.from);
-        if (chatFlow.states[nextStateId].type == "apiCall") {
+        if (chatFlow.states[nextStateId]  && chatFlow.states[nextStateId].type == "apiCall") {
           await showState(chatFlow.states[nextStateId].options[0].next, msg.from);
         }
       } else {

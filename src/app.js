@@ -1,6 +1,6 @@
 const QRCODE = require("qrcode-terminal");
 const { Client } = require("whatsapp-web.js");
-const chatFlow = require("../Fluxes/jsonComplexFlux.json");
+const chatFlow = require("../Fluxes/jsonTest.json");
 const redis = require("redis");
 
 const client = new Client();
@@ -18,9 +18,7 @@ async function sendMessage(message, chatId) {
 
 async function showState(stateId, chatId) {
   console.log("Sending msg to user using: " + stateId + "\n");
-  console.log("antes", await getUser(chatId));
   setUser(chatId, JSON.stringify({ currentStateId: stateId }));
-  console.log("depois", await getUser(chatId));
   const state = chatFlow.states[stateId];
   let message;
 
@@ -78,36 +76,35 @@ async function getUser(id) {
   return JSON.parse(await redisClient.get(`user:${id}`));
 }
 
+async function deleteUser(id) {
+  await redisClient.del(`user:${id}`);
+}
+
 client.on("message", async (msg) => {
-  if (await getUser(msg.from) === null) {
-    console.log("não encontrou")
-    setUser(msg.from, JSON.stringify({ currentStateId: null }));
+  if ((await getUser(msg.from)) === null) {
+    console.log("criando de novo");
+    setUser(msg.from, JSON.stringify({ currentStateId: null, params: {} }));
   }
 
-  let user = await getUser(msg.from)
-  console.log(user);
-
+  let user = await getUser(msg.from);
   let currentState = chatFlow.states[user.currentStateId];
 
-  console.log(`Received message from ${msg.from}: ${msg.body}`);
-  console.log(currentState);
+  console.log(
+    `Received message from ${msg.from}: ${msg.body} - Current state: ${user.currentStateId}`
+  );
   const message = msg.body.trim();
   const choiceIndex = parseInt(message, 10) - 1;
 
-  if (!currentState || currentState === "end") {
-    currentState = chatFlow.initialState;
-    await showState(currentState, msg.from);
+  if (!currentState) {
+    await showState(chatFlow.initialState, msg.from);
     return;
   }
-
-  console.log(currentState)
 
   if (
     currentState.type == "baseMessage" &&
     choiceIndex >= 0 &&
     choiceIndex < currentState.options.length
   ) {
-    console.log("entrou aqui")
     const nextStateId = currentState.options[choiceIndex].next;
     const nextState = chatFlow.states[nextStateId];
     await showState(nextStateId, msg.from);
@@ -120,7 +117,15 @@ client.on("message", async (msg) => {
     (choiceIndex < 0 || choiceIndex >= currentState.options.length)
   ) {
     await sendMessage("Opção inválida. Tente novamente.", msg.from);
-    await showState(currentState, msg.from);
+    await showState(user.currentStateId, msg.from);
+  }
+
+  user = await getUser(msg.from);
+  console.log("novo user", user);
+
+  if (user.currentStateId === "end") {
+    await deleteUser(msg.from);
+    return;
   }
 });
 

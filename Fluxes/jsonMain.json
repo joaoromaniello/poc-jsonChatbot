@@ -1,0 +1,17 @@
+{
+  "initialState": "welcome",
+  "states": {
+    "welcome": {
+      "type": "sendMessage",
+      "id": "welcome",
+      "message": "Olá, tudo bem?",
+      "next": ["final"]
+    },
+    "final": {
+      "type": "sendMessage",
+      "id": "final",
+      "message": "Estou encerrando esse fluxo!",
+      "end": true
+    }
+  }
+}

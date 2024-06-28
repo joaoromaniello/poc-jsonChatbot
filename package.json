@@ -4,15 +4,16 @@
   "description": "A poc of a chatbot that runs entirely using JSON.",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js",
+    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.19.2",
     "qrcode": "^1.5.3",
     "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus",
-    "redis": "4.0.0"
+    "redis": "4.0.0",
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus"
   }
 }

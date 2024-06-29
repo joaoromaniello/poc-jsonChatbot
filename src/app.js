@@ -4,6 +4,18 @@ const redisClient = require('./redis/redisClient.js');
 const {isValidStateType} = require('./data/data.js');
 const Utility = require('../utils/Utility');
 
+const stateActions = {
+  iterationMenu: async (state, chatId) => {
+    await sendBaseMessage(state, chatId);
+  },
+  apiCall: async (state, chatId) => {
+    await processApiCall(state, chatId);
+  },
+  undefinedState: async (state, chatId) => {
+    await redisClient.setUser(chatId, {currentStateId: "error"});
+    await sendBaseMessage(chatFlow.states["error"], chatId);
+  }
+};
 
 async function sendMessage(message, chatId) {
   await client.sendMessage(chatId, message);
@@ -14,7 +26,6 @@ async function sendBaseMessage(state, chatId) {
   let message = `${state.message}\n` + state.options.map((option, index) => `\n*${index + 1}*. ${option.text}`).join('');
   await sendMessage(message, chatId);
 }
-
 
 async function processApiCall(state, chatId) {
   try {
@@ -42,22 +53,10 @@ async function executeState(stateId, chatId) {
   try {
     await redisClient.setUser(chatId, {currentStateId: stateId});
     const state = chatFlow.states[stateId];
-
-    switch (state?.type ?? "undefinedState") {
-      case "iterationMenu":
-        await sendBaseMessage(state, chatId);
-        break;
-      case "apiCall":
-        await processApiCall(state, chatId);
-        break;
-      case "undefinedState":
-        await redisClient.setUser(chatId, {currentStateId: "error"});
-        await sendBaseMessage(chatFlow.states["error"], chatId);
-        break;
-      default:
-        await sendMessage("Algo inesperado aconteceu.", chatId);
-        break;
-    }
+    const action = stateActions[state?.type ?? "undefinedState"] || (async () => {
+      await sendMessage("Algo inesperado aconteceu.", chatId);
+    });
+    await action(state, chatId);
   } finally {
     await redisClient.updateUserDataField(chatId, "lock", false);
   }

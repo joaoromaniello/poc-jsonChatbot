@@ -1,7 +1,7 @@
 const QRCODE = require("qrcode-terminal");
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const express = require("express");
-const { treatEvent } = require("./event.js");
+const { receiveMessage } = require("./event.js");
 const app = express();
 const PORT = 3000;
 
@@ -20,7 +20,7 @@ client.on("ready", () => {
 });
 
 client.on("message", async (msg) => {
-  treatEvent(msg, client);
+  receiveMessage(msg, client);
 });
 
 app.get("/", (req, res) => {

@@ -71,6 +71,19 @@
         "id": "dynamicFlux",
         "options": [
           {
+            "next": "dynamicFlux2"
+          }
+        ],
+        "dynamicOptions":{
+          "url":"https://85314db9330548538cdb9b383d1b51b3.api.mockbin.io/",
+          "isRecursive": false
+        }
+      },
+      "dynamicFlux2": {
+        "type":"apiCall",
+        "id": "dynamicFlux2",
+        "options": [
+          {
             "next": "userName"
           }
         ],

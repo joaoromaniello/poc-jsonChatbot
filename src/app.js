@@ -100,9 +100,8 @@ async function handleStateAction(stateId, chatId) {
   await redisClient.updateUserDataField(chatId, "lock", true);
   try {
     await redisClient.setUser(chatId, {currentStateId: stateId});
-    const state = chatFlow.states[stateId];
+    let state = chatFlow.states[stateId];
     console.log("StateId: ", stateId)
-    //console.log("State: ", state)
 
     const action = stateActions[state?.type ?? "undefinedState"] || (async () => {
       await sendMessage("Algo inesperado aconteceu.", chatId);
@@ -110,55 +109,27 @@ async function handleStateAction(stateId, chatId) {
 
     await action(state, chatId);
     
-
+    while(state.type == "apiCall"){
+        console.log("API CALL")
+  
+        const nextState = state.options[0].next ? state.options[0].next : "welcome";
+        const actionType = chatFlow.states[nextState]?.type ?? "undefinedState";
+        console.log("Choosen nextState: ", nextState)
+        console.log("The next state by law is ", state.options[0].next)
+  
+        let action = stateActions[actionType] || (async () => {
+            await sendMessage("Algo inesperado aconteceu.", chatId);
+  
+        });
     
-    if (state.type == "apiCall") {
-      console.log("API CALL")
+        await action(chatFlow.states[nextState], chatId);
+    
+        await redisClient.setUser(chatId, {currentStateId: nextState});
+        
+        state = chatFlow.states[nextState];
+        //Se o proximo do proximo (chatFlow.states[nextState].next) tiver o type == "apiCall", repete tudo, só que com o estado atual sendo o chatFlow.states[nextState]
+    }
 
-      const nextState = state.options[0].next ? state.options[0].next : "welcome";
-      const actionType = chatFlow.states[nextState]?.type ?? "undefinedState";
-      console.log("Choosen nextState: ", nextState)
-      console.log("The next state by law is ", state.options[0].next)
-
-      let action = stateActions[actionType] || (async () => {
-          await sendMessage("Algo inesperado aconteceu.", chatId);
-
-      });
-  
-      await action(chatFlow.states[nextState], chatId);
-  
-      await redisClient.setUser(chatId, {currentStateId: nextState});
-  }
-
-    // if(state.next == "conditional"){
-    //   let conditions;
-    //   let currentState = chatFlow.states[state.next];
-    //   let field = currentState.field;
-    //   let fieldValue = redisClient.getUserData(chatId, field);
-
-
-    //   if(currentState.condition && fieldValue){
-    //      conditions = conditionals[currentState?.condition ?? "undefinedState"] || (async () => {
-    //       await sendMessage("Algo inesperado aconteceu...", msg.from);
-    //     });
-    //   }else{
-    //     await sendMessage("Campo não informado....", msg.from);
-    //   }
-    //   if(conditions && await conditions(fieldValue,currentState.param)){
-    //     const action = stateActions[chatFlow.states[currentState.true].type ?? "undefinedState"] || (async () => {
-    //       await sendMessage("Algo inesperado aconteceu.", chatId);
-    //     });
-
-    //     await action(currentState.true, chatId);
-    //     await redisClient.setUser(chatId, {currentStateId: currentState.true});
-    //   }else{
-    //     const action = stateActions[chatFlow.states[currentState.false].type ?? "undefinedState"] || (async () => {
-    //       await sendMessage("Algo inesperado aconteceu.", chatId);
-    //     });
-    //     await action(currentState.false, chatId);
-    //     await redisClient.setUser(chatId, {currentStateId: currentState.false});
-    //   }
-    // }
 
   } finally {
     await redisClient.updateUserDataField(chatId, "lock", false);

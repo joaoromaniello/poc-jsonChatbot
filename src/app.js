@@ -1,4 +1,4 @@
-const client = require('./whatsappClient.js');
+const client = require('./clients/whatsappClient.js');
 const chatFlow = require("../Fluxes/jsonTest.json");
 const redisClient = require('./clients/redisClient.js');
 const {isValidStateType} = require('./data/data.js');

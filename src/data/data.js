@@ -1,13 +1,13 @@
 function isValidStateType(type) {
-    return Object.values(StateType).includes(type);
-  }
+  return Object.values(StateType).includes(type);
+}
 
 const StateType = {
     ApiCall: "apiCall",
-    conditional: "conditional",  
+    OutroTipo: "outroTipo", 
   };
 
-  module.exports = {
-    StateType,
-    isValidStateType,
-  };
+module.exports = {
+  StateType,
+  isValidStateType,
+};

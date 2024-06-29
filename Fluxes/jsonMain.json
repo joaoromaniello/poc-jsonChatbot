@@ -4,8 +4,31 @@
     "welcome": {
       "type": "sendMessage",
       "id": "welcome",
-      "message": "Olá, tudo bem?",
-      "next": ["final"]
+      "message": "Olá, tudo bem? Eu sou um chatbot.",
+      "next": "options"
+    },
+    "options": {
+      "type": "iterationMenu",
+      "id": "welcome",
+      "message": "Como posso te ajudar?",
+      "options": [
+        {
+          "text": "Gostaria de ir para o fluxo A",
+          "next": "fluxA"
+        },
+        {
+          "text": "Gostaria de ir para o fluxo B",
+          "next": "fluxB"
+        },
+        {
+          "text": "Gostaria de ir para o fluxo dinamico!!",
+          "next": "dynamicFlux"
+        },
+        {
+          "text": "Fluxo de cadastro",
+          "next": "userName"
+        }
+      ]
     },
     "final": {
       "type": "sendMessage",

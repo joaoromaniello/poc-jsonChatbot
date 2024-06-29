@@ -1,0 +1,2 @@
+{"description": "Um fluxo de boas-vindas que envia uma mensagem de boas-vindas ao usuário e pergunta o nome dele.", "json": "{\"flow\": \"welcome\", \"steps\": [{\"action\": \"send_message\", \"message\": \"Bem-vindo! Como você se chama?\"}]}"}
+{"description": "Um fluxo de suporte que pergunta ao usuário qual é o problema dele e, em seguida, cria um ticket de suporte.", "json": "{\"flow\": \"support\", \"steps\": [{\"action\": \"ask_question\", \"question\": \"Qual é o seu problema?\"}, {\"action\": \"create_ticket\", \"category\": \"support\"}]}"}

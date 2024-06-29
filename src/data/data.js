@@ -4,7 +4,7 @@ function isValidStateType(type) {
 
 const StateType = {
     ApiCall: "apiCall",
-    OutroTipo: "outroTipo",  // Adicionei este tipo para exemplificar
+    conditional: "conditional",  
   };
 
   module.exports = {

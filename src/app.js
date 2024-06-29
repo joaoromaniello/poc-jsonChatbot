@@ -6,6 +6,7 @@ const Utility = require('../utils/Utility');
 
 const stateActions = {
   iterationMenu: async (state, chatId) => {
+    console.log("Iteration Menu init...")
     await sendBaseMessage(state, chatId);
   },
   apiCall: async (state, chatId) => {
@@ -16,7 +17,7 @@ const stateActions = {
   },
 
   conditional: async (state, chatId) => {
-
+    await sendBaseMessage(state, chatId);
   },
   undefinedState: async (state, chatId) => {
     await redisClient.setUser(chatId, {currentStateId: "error"});
@@ -40,6 +41,22 @@ const validationSet = {
 
 };
 
+const conditionals = {
+  equals: async (message,param) => {
+    return param === message;
+  },
+  greaterThan: async (message,param) => {
+    return param.greaterThan(message);
+  },
+  lessThan: async (message,param) => {
+    return param.lessThan(message);
+  },
+  undefinedState: async (message) => {
+    await redisClient.setUser(chatId, {currentStateId: "error"});
+    await sendBaseMessage(chatFlow.states["error"], chatId);
+  },
+}
+
 async function sendMessage(message, chatId) {
   await client.sendMessage(chatId, message);
   Utility.updateLastMessageSentTime(chatId, new Date());
@@ -47,6 +64,7 @@ async function sendMessage(message, chatId) {
 
 async function sendBaseMessage(state, chatId) {
   let message;
+  console.log("Im on State: ", state )
   if(state.options){
     message= `${state.message}\n` + state.options.map((option, index) => `\n*${index + 1}*. ${option.text}`).join('');
   }
@@ -84,11 +102,64 @@ async function handleStateAction(stateId, chatId) {
     await redisClient.setUser(chatId, {currentStateId: stateId});
     const state = chatFlow.states[stateId];
     console.log("StateId: ", stateId)
-    console.log("State: ", state)
+    //console.log("State: ", state)
+
     const action = stateActions[state?.type ?? "undefinedState"] || (async () => {
       await sendMessage("Algo inesperado aconteceu.", chatId);
     });
+
     await action(state, chatId);
+    
+
+    
+    if (state.type == "apiCall") {
+      console.log("API CALL")
+
+      const nextState = state.options[0].next ? state.options[0].next : "welcome";
+      const actionType = chatFlow.states[nextState]?.type ?? "undefinedState";
+      console.log("Choosen nextState: ", nextState)
+      console.log("The next state by law is ", state.options[0].next)
+
+      let action = stateActions[actionType] || (async () => {
+          await sendMessage("Algo inesperado aconteceu.", chatId);
+
+      });
+  
+      await action(chatFlow.states[nextState], chatId);
+  
+      await redisClient.setUser(chatId, {currentStateId: nextState});
+  }
+
+    // if(state.next == "conditional"){
+    //   let conditions;
+    //   let currentState = chatFlow.states[state.next];
+    //   let field = currentState.field;
+    //   let fieldValue = redisClient.getUserData(chatId, field);
+
+
+    //   if(currentState.condition && fieldValue){
+    //      conditions = conditionals[currentState?.condition ?? "undefinedState"] || (async () => {
+    //       await sendMessage("Algo inesperado aconteceu...", msg.from);
+    //     });
+    //   }else{
+    //     await sendMessage("Campo não informado....", msg.from);
+    //   }
+    //   if(conditions && await conditions(fieldValue,currentState.param)){
+    //     const action = stateActions[chatFlow.states[currentState.true].type ?? "undefinedState"] || (async () => {
+    //       await sendMessage("Algo inesperado aconteceu.", chatId);
+    //     });
+
+    //     await action(currentState.true, chatId);
+    //     await redisClient.setUser(chatId, {currentStateId: currentState.true});
+    //   }else{
+    //     const action = stateActions[chatFlow.states[currentState.false].type ?? "undefinedState"] || (async () => {
+    //       await sendMessage("Algo inesperado aconteceu.", chatId);
+    //     });
+    //     await action(currentState.false, chatId);
+    //     await redisClient.setUser(chatId, {currentStateId: currentState.false});
+    //   }
+    // }
+
   } finally {
     await redisClient.updateUserDataField(chatId, "lock", false);
   }
@@ -121,6 +192,7 @@ client.on("message", async (msg) => {
   }
 
   switch (currentState?.type ?? "undefinedState") {
+    
     case "iterationMenu":
       if (choiceIndex >= 0 && choiceIndex < currentState.options.length) {
         const nextStateId = currentState.options[choiceIndex].next;
@@ -128,15 +200,12 @@ client.on("message", async (msg) => {
         await redisClient.setUser(msg.from, user);
 
         await handleStateAction(nextStateId, msg.from);
-        if (chatFlow.states[nextStateId]  && isValidStateType(chatFlow.states[nextStateId].type)) {
-          await handleStateAction(chatFlow.states[nextStateId].options[0].next, msg.from);
-        }
       } else {
         await sendMessage("Opção inválida. Tente novamente.", msg.from);
         await handleStateAction(user.currentStateId, msg.from);
       }
       break;
-
+    
     case "inputForm":
       if(currentState.inputValidation){
         const validation = validationSet[currentState?.inputValidation ?? "undefinedState"] || (async () => {
@@ -157,11 +226,12 @@ client.on("message", async (msg) => {
         await handleStateAction(currentState.next, msg.from);
         }
         break;
-
+   
     case "undefinedState":
       await handleStateAction("error", msg.from);
       break;
     
+
     default:
       await sendMessage("Houve um erro inesperado. Por favor, tente novamente.", msg.from);
       await handleStateAction(user.currentStateId, msg.from);

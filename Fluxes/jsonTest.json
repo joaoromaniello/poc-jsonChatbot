@@ -71,7 +71,7 @@
         "id": "dynamicFlux",
         "options": [
           {
-            "next": "dasda"
+            "next": "userName"
           }
         ],
         "dynamicOptions":{
@@ -84,7 +84,7 @@
         "id": "userName",
         "message": "Por favor, digite seu nome:",
         "field": "name",
-        "next": "conditional"
+        "next": "userCnpj"
       },
       "conditional": {
         "type":"conditional",

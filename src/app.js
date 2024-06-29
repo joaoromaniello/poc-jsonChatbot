@@ -11,12 +11,10 @@ async function sendMessage(message, chatId) {
 }
 
 async function sendBaseMessage(state, chatId) {
-  let message = state.message + "\n";
-  state.options.forEach((option, index) => {
-    message += `\n*${index + 1}*. ${option.text}`;
-  });
+  let message = `${state.message}\n` + state.options.map((option, index) => `\n*${index + 1}*. ${option.text}`).join('');
   await sendMessage(message, chatId);
 }
+
 
 async function processApiCall(state, chatId) {
   try {

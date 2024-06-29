@@ -17,6 +17,10 @@
           {
             "text": "Gostaria de ir para o fluxo dinamico!!",
             "next": "dynamicFlux"
+          },
+          {
+            "text": "Fluxo de cadastro",
+            "next": "userInfo"
           }
         ],
         "dynamicOptions":{
@@ -74,6 +78,13 @@
           "url":"https://85314db9330548538cdb9b383d1b51b3.api.mockbin.io/",
           "isRecursive": false
         }
+      },
+      "userInfo":{
+        "type": "inputForm",
+        "id": "userInfo",
+        "message": "Por favor, digite seu nome:",
+        "field": "name",
+        "next": "welcome"
       },
       "error": {
         "type":"iterationMenu",

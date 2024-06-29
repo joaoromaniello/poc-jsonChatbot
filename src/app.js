@@ -11,10 +11,14 @@ const stateActions = {
   apiCall: async (state, chatId) => {
     await fetchAndUpdateUserData (state, chatId);
   },
+  inputForm: async (state, chatId) => {
+      await sendBaseMessage(state, chatId);
+  },
   undefinedState: async (state, chatId) => {
     await redisClient.setUser(chatId, {currentStateId: "error"});
     await sendBaseMessage(chatFlow.states["error"], chatId);
-  }
+  },
+
 };
 
 async function sendMessage(message, chatId) {
@@ -23,7 +27,14 @@ async function sendMessage(message, chatId) {
 }
 
 async function sendBaseMessage(state, chatId) {
-  let message = `${state.message}\n` + state.options.map((option, index) => `\n*${index + 1}*. ${option.text}`).join('');
+  let message;
+  if(state.options){
+    message= `${state.message}\n` + state.options.map((option, index) => `\n*${index + 1}*. ${option.text}`).join('');
+  }
+  else{
+    message = `${state.message}\n` ;
+  }
+
   await sendMessage(message, chatId);
 }
 
@@ -53,6 +64,7 @@ async function handleStateAction(stateId, chatId) {
   try {
     await redisClient.setUser(chatId, {currentStateId: stateId});
     const state = chatFlow.states[stateId];
+    console.log("State: ", state)
     const action = stateActions[state?.type ?? "undefinedState"] || (async () => {
       await sendMessage("Algo inesperado aconteceu.", chatId);
     });
@@ -105,10 +117,15 @@ client.on("message", async (msg) => {
       }
       break;
 
+    case "inputForm":
+      await redisClient.updateUserDataField(msg.from, currentState.field, message);
+      await handleStateAction(currentState.next, msg.from);
+      break;
+
     case "undefinedState":
       await handleStateAction("error", msg.from);
       break;
-
+    
     default:
       await sendMessage("Houve um erro inesperado. Por favor, tente novamente.", msg.from);
       await handleStateAction(user.currentStateId, msg.from);

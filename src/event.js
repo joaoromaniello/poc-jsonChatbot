@@ -1,4 +1,4 @@
-const redisClient = require("./redis/redisClient");
+const redisClient = require("./clients/redisClient");
 const chatFlow = require("../Fluxes/jsonMain.json");
 
 let client = null;

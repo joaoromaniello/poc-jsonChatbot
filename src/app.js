@@ -1,6 +1,6 @@
 const client = require('./whatsappClient.js');
 const chatFlow = require("../Fluxes/jsonTest.json");
-const redisClient = require('./redis/redisClient.js');
+const redisClient = require('./clients/redisClient.js');
 const {isValidStateType} = require('./data/data.js');
 const Utility = require('../utils/Utility');
 

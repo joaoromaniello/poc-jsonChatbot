@@ -1,4 +1,4 @@
-const redisClient = require("../src/redis/redisClient.js");
+const redisClient = require("../src/clients/redisClient.js");
 
 class Utility {
   static lastMessageSentTimes = {};

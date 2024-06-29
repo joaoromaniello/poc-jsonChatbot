@@ -22,10 +22,12 @@ class RedisClient {
       currentValue = JSON.parse(currentValue);
     }
 
-    Object.assign(currentValue, userObject);
+    const newUserObject = { lock: false, ...userObject };
+
+    Object.assign(currentValue, newUserObject);
 
     await this.client.set(userKey, JSON.stringify(currentValue));
-  }
+}
 
   async getUser(id) {
     const userData = await this.client.get(`user:${id}`);

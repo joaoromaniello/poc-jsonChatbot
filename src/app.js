@@ -1,18 +1,13 @@
-const QRCODE = require("qrcode-terminal");
-const { Client,LocalAuth } = require("whatsapp-web.js");
+const client = require('./whatsappClient.js');
 const chatFlow = require("../Fluxes/jsonTest.json");
-const redis = require("redis");
 const redisClient = require('./redis/redisClient.js');
+const {isValidStateType} = require('./data/data.js');
+const Utility = require('../utils/Utility');
 
-
-const client = new Client({
-  authStrategy: new LocalAuth({
-    dataPath: 'autenticationFolder'
-  })
-})
 
 async function sendMessage(message, chatId) {
   await client.sendMessage(chatId, message);
+  Utility.updateLastMessageSentTime(chatId, new Date());
 }
 
 async function sendBaseMessage(state, chatId) {
@@ -31,7 +26,7 @@ async function processApiCall(state, chatId) {
     await redisClient.updateUserWithData(chatId, data);
 
     if (state.dynamicOptions.template) {
-      const filledTemplate = fillTemplateWithData(
+      const filledTemplate = Utility.fillTemplateWithData(
         state.dynamicOptions.template,
         data
       );
@@ -44,41 +39,38 @@ async function processApiCall(state, chatId) {
   }
 }
 
+async function executeState(stateId, chatId) {
+  await redisClient.updateUserDataField(chatId, "lock", true);
+  try {
+    await redisClient.setUser(chatId, {currentStateId: stateId});
+    const state = chatFlow.states[stateId];
 
-async function showState(stateId, chatId) {
-  await redisClient.setUser(chatId, {currentStateId: stateId} );
-  const state = chatFlow.states[stateId];
-
-  switch (state?.type ?? "undefinedState") {
-    case "iterationMenu":
-      await sendBaseMessage(state, chatId);
-      break;
-    case "apiCall":
-      await processApiCall(state, chatId);
-      break;
-    case "undefinedState":
-      await redisClient.setUser(chatId,  {currentStateId: "error"});
-      await sendBaseMessage(chatFlow.states["error"], chatId);
-      break;
-    default:
-      await sendMessage("Algo inesperado aconteceu.", chatId);
-      break;
+    switch (state?.type ?? "undefinedState") {
+      case "iterationMenu":
+        await sendBaseMessage(state, chatId);
+        break;
+      case "apiCall":
+        await processApiCall(state, chatId);
+        break;
+      case "undefinedState":
+        await redisClient.setUser(chatId, {currentStateId: "error"});
+        await sendBaseMessage(chatFlow.states["error"], chatId);
+        break;
+      default:
+        await sendMessage("Algo inesperado aconteceu.", chatId);
+        break;
+    }
+  } finally {
+    await redisClient.updateUserDataField(chatId, "lock", false);
   }
 }
 
-function fillTemplateWithData(template, data) {
-  return template.replace(/\{(\w+)\}/g, (match, key) => data[key] || match);
-}
-
-client.on("qr", (qr) => {
-  QRCODE.generate(qr, { small: true });
-});
-
-client.on("ready", () => {
-  console.log("Client is ready!");
-});
-
 client.on("message", async (msg) => {
+
+  if (await Utility.shouldIgnoreBasedOnTime(msg) || await Utility.shouldIgnoreBasedOnLock(msg)) {
+    return; 
+  }
+
   let user = await redisClient.getUser(msg.from);
   
   if (!user) {
@@ -95,7 +87,7 @@ client.on("message", async (msg) => {
   const choiceIndex = parseInt(message, 10) - 1;
 
   if (!currentState) {
-    await showState(chatFlow.initialState, msg.from);
+    await executeState(chatFlow.initialState, msg.from);
     return;
   }
 
@@ -106,23 +98,23 @@ client.on("message", async (msg) => {
         user.currentStateId = nextStateId;  
         await redisClient.setUser(msg.from, user);
 
-        await showState(nextStateId, msg.from);
-        if (chatFlow.states[nextStateId]  && chatFlow.states[nextStateId].type == "apiCall") {
-          await showState(chatFlow.states[nextStateId].options[0].next, msg.from);
+        await executeState(nextStateId, msg.from);
+        if (chatFlow.states[nextStateId]  && isValidStateType(chatFlow.states[nextStateId].type)) {
+          await executeState(chatFlow.states[nextStateId].options[0].next, msg.from);
         }
       } else {
         await sendMessage("Opção inválida. Tente novamente.", msg.from);
-        await showState(user.currentStateId, msg.from);
+        await executeState(user.currentStateId, msg.from);
       }
       break;
 
     case "undefinedState":
-      await showState("error", msg.from);
+      await executeState("error", msg.from);
       break;
 
     default:
       await sendMessage("Houve um erro inesperado. Por favor, tente novamente.", msg.from);
-      await showState(user.currentStateId, msg.from);
+      await executeState(user.currentStateId, msg.from);
       break;
   }
 

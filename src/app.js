@@ -108,7 +108,7 @@ async function handleStateAction(stateId, chatId) {
     });
 
     await action(state, chatId);
-    
+
     while(state.type == "apiCall"){
         console.log("API CALL")
   
@@ -129,6 +129,7 @@ async function handleStateAction(stateId, chatId) {
         state = chatFlow.states[nextState];
         //Se o proximo do proximo (chatFlow.states[nextState].next) tiver o type == "apiCall", repete tudo, só que com o estado atual sendo o chatFlow.states[nextState]
     }
+
 
 
   } finally {
@@ -197,12 +198,40 @@ client.on("message", async (msg) => {
         await handleStateAction(currentState.next, msg.from);
         }
         break;
-   
+
+    case "conditional":
+        if (currentState.condition) {
+          const condition =
+          conditionals[currentState?.condition ?? "undefinedState"] ||
+            (async () => {
+              await sendMessage("Algo inesperado aconteceu.", msg.from);
+            });
+          
+
+          let field =  redisClient.getUserData(msg.from, currentState.field)
+
+          if(field == null || field == undefined){
+            await sendMessage("Campo não encontrado.", msg.from);
+            await handleStateAction(currentState.false, msg.from);
+            break;
+          }
+
+          if (await condition(field,currentState.param)) {
+            await handleStateAction(currentState.true, msg.from);
+            break;
+          }
+
+          await handleStateAction(currentState.false, msg.from);
+          break
+        }
+
+        await handleStateAction("welcome", msg.from);
+        break;
+
     case "undefinedState":
       await handleStateAction("error", msg.from);
       break;
-    
-
+  
     default:
       await sendMessage("Houve um erro inesperado. Por favor, tente novamente.", msg.from);
       await handleStateAction(user.currentStateId, msg.from);

@@ -39,36 +39,19 @@ class Utility {
     return false;
   }
 
-  static async validarCNPJ(cnpj) {
-    cnpj = cnpj.replace(/[^\d]+/g, "");
+  static async validaCNPJ(cnpj) {
+    var b = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    var c = String(cnpj).replace(/[^\d]/g, "");
 
-    if (cnpj.length !== 14) {
-      return false;
-    }
-    if (/^(\d)\1+$/.test(cnpj)) {
-      return false;
-    }
+    if (c.length !== 14) return false;
 
-    let soma = 0;
-    for (let i = 0; i < 12; i++) {
-      soma += parseInt(cnpj.charAt(i)) * (13 - i);
-    }
-    let resto = soma % 11;
-    let digitoVerificador1 = resto < 2 ? 0 : 11 - resto;
+    if (/0{14}/.test(c)) return false;
 
-    soma = 0;
-    for (let i = 0; i < 13; i++) {
-      soma += parseInt(cnpj.charAt(i)) * (14 - i);
-    }
-    resto = soma % 11;
-    let digitoVerificador2 = resto < 2 ? 0 : 11 - resto;
+    for (var i = 0, n = 0; i < 12; n += c[i] * b[++i]);
+    if (c[12] != ((n %= 11) < 2 ? 0 : 11 - n)) return false;
 
-    if (
-      parseInt(cnpj.charAt(12)) !== digitoVerificador1 ||
-      parseInt(cnpj.charAt(13)) !== digitoVerificador2
-    ) {
-      return false;
-    }
+    for (var i = 0, n = 0; i <= 12; n += c[i] * b[i++]);
+    if (c[13] != ((n %= 11) < 2 ? 0 : 11 - n)) return false;
 
     return true;
   }

@@ -24,7 +24,7 @@ const stateActions = {
 
 const validationSet = {
   cnpjValidation: async (message) => {
-    return Utility.validarCNPJ(message)
+    return Utility.validaCNPJ(message)
   },
   cpfValidation: async (message) => {
     return Utility.validaCPF(message)

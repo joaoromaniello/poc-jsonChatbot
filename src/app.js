@@ -21,6 +21,22 @@ const stateActions = {
 
 };
 
+
+const validationSet = {
+  cnpjValidation: async (message) => {
+    return Utility.validarCNPJ(message)
+  },
+  cpfValidation: async (message) => {
+    return Utility.validaCPF(message)
+  },
+
+  undefinedState: async (message) => {
+    await redisClient.setUser(chatId, {currentStateId: "error"});
+    await sendBaseMessage(chatFlow.states["error"], chatId);
+  },
+
+};
+
 async function sendMessage(message, chatId) {
   await client.sendMessage(chatId, message);
   Utility.updateLastMessageSentTime(chatId, new Date());
@@ -64,6 +80,7 @@ async function handleStateAction(stateId, chatId) {
   try {
     await redisClient.setUser(chatId, {currentStateId: stateId});
     const state = chatFlow.states[stateId];
+    console.log("StateId: ", stateId)
     console.log("State: ", state)
     const action = stateActions[state?.type ?? "undefinedState"] || (async () => {
       await sendMessage("Algo inesperado aconteceu.", chatId);
@@ -118,9 +135,25 @@ client.on("message", async (msg) => {
       break;
 
     case "inputForm":
-      await redisClient.updateUserDataField(msg.from, currentState.field, message);
-      await handleStateAction(currentState.next, msg.from);
-      break;
+      if(currentState.inputValidation){
+        const validation = validationSet[currentState?.inputValidation ?? "undefinedState"] || (async () => {
+          await sendMessage("Algo inesperado aconteceu.", msg.from);
+        });
+  
+        if(await validation(message)){
+          await redisClient.updateUserDataField(msg.from, currentState.field, message);
+          await handleStateAction(currentState.next, msg.from);
+          break;
+        }
+        
+        await sendMessage(`${currentState.field.toUpperCase()} inválido.`, msg.from);
+        await handleStateAction(currentState.id, msg.from);
+        break;
+      }else{
+        await redisClient.updateUserDataField(msg.from, currentState.field, message);
+        await handleStateAction(currentState.next, msg.from);
+        break;}
+
 
     case "undefinedState":
       await handleStateAction("error", msg.from);

@@ -20,7 +20,7 @@
           },
           {
             "text": "Fluxo de cadastro",
-            "next": "userInfo"
+            "next": "userName"
           }
         ],
         "dynamicOptions":{
@@ -79,11 +79,34 @@
           "isRecursive": false
         }
       },
-      "userInfo":{
+      "userName":{
         "type": "inputForm",
-        "id": "userInfo",
+        "id": "userName",
         "message": "Por favor, digite seu nome:",
         "field": "name",
+        "next": "userCpf"
+      },
+      "userCnpj":{
+        "type": "inputForm",
+        "id": "userCnpj",
+        "message": "Por favor, digite seu cnpj (Apenas numeros):",
+        "field": "cnpj",
+        "next": "userIndustry",
+        "inputValidation":"cnpjValidation"
+      },
+      "userCpf":{
+        "type": "inputForm",
+        "id": "userCpf",
+        "message": "Por favor, digite seu cpf (Apenas numeros):",
+        "field": "cpf",
+        "next": "userCnpj",
+        "inputValidation":"cpfValidation"
+      },
+      "userIndustry":{
+        "type": "inputForm",
+        "id": "userIndustry",
+        "message": "Por favor, digite o nome da empresa.",
+        "field": "industry",
         "next": "welcome"
       },
       "error": {

@@ -84,7 +84,16 @@
         "id": "userName",
         "message": "Por favor, digite seu nome:",
         "field": "name",
-        "next": "userCpf"
+        "next": "conditional"
+      },
+      "conditional": {
+        "type":"conditional",
+        "id": "conditional",
+        "field": "name",
+        "condition": "equals",
+        "param": "empresa",
+        "true": "userCnpj",
+        "false": "userCpf"
       },
       "userCnpj":{
         "type": "inputForm",

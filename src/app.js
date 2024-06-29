@@ -14,13 +14,16 @@ const stateActions = {
   inputForm: async (state, chatId) => {
       await sendBaseMessage(state, chatId);
   },
+
+  conditional: async (state, chatId) => {
+
+  },
   undefinedState: async (state, chatId) => {
     await redisClient.setUser(chatId, {currentStateId: "error"});
     await sendBaseMessage(chatFlow.states["error"], chatId);
   },
 
 };
-
 
 const validationSet = {
   cnpjValidation: async (message) => {
@@ -152,8 +155,8 @@ client.on("message", async (msg) => {
       }else{
         await redisClient.updateUserDataField(msg.from, currentState.field, message);
         await handleStateAction(currentState.next, msg.from);
-        break;}
-
+        }
+        break;
 
     case "undefinedState":
       await handleStateAction("error", msg.from);

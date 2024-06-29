@@ -9,7 +9,7 @@ const stateActions = {
     await sendBaseMessage(state, chatId);
   },
   apiCall: async (state, chatId) => {
-    await processApiCall(state, chatId);
+    await fetchAndUpdateUserData (state, chatId);
   },
   undefinedState: async (state, chatId) => {
     await redisClient.setUser(chatId, {currentStateId: "error"});
@@ -27,7 +27,7 @@ async function sendBaseMessage(state, chatId) {
   await sendMessage(message, chatId);
 }
 
-async function processApiCall(state, chatId) {
+async function fetchAndUpdateUserData (state, chatId) {
   try {
     const response = await fetch(state.dynamicOptions.url);
     const data = await response.json();
@@ -48,7 +48,7 @@ async function processApiCall(state, chatId) {
   }
 }
 
-async function executeState(stateId, chatId) {
+async function handleStateAction(stateId, chatId) {
   await redisClient.updateUserDataField(chatId, "lock", true);
   try {
     await redisClient.setUser(chatId, {currentStateId: stateId});
@@ -84,7 +84,7 @@ client.on("message", async (msg) => {
   const choiceIndex = parseInt(message, 10) - 1;
 
   if (!currentState) {
-    await executeState(chatFlow.initialState, msg.from);
+    await handleStateAction(chatFlow.initialState, msg.from);
     return;
   }
 
@@ -95,23 +95,23 @@ client.on("message", async (msg) => {
         user.currentStateId = nextStateId;  
         await redisClient.setUser(msg.from, user);
 
-        await executeState(nextStateId, msg.from);
+        await handleStateAction(nextStateId, msg.from);
         if (chatFlow.states[nextStateId]  && isValidStateType(chatFlow.states[nextStateId].type)) {
-          await executeState(chatFlow.states[nextStateId].options[0].next, msg.from);
+          await handleStateAction(chatFlow.states[nextStateId].options[0].next, msg.from);
         }
       } else {
         await sendMessage("Opção inválida. Tente novamente.", msg.from);
-        await executeState(user.currentStateId, msg.from);
+        await handleStateAction(user.currentStateId, msg.from);
       }
       break;
 
     case "undefinedState":
-      await executeState("error", msg.from);
+      await handleStateAction("error", msg.from);
       break;
 
     default:
       await sendMessage("Houve um erro inesperado. Por favor, tente novamente.", msg.from);
-      await executeState(user.currentStateId, msg.from);
+      await handleStateAction(user.currentStateId, msg.from);
       break;
   }
 

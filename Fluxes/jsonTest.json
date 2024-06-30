@@ -84,7 +84,7 @@
         "id": "dynamicFlux2",
         "options": [
           {
-            "next": "userName"
+            "next": "conditional2"
           }
         ],
         "dynamicOptions":{
@@ -105,6 +105,15 @@
         "field": "name",
         "condition": "equals",
         "param": "empresa",
+        "true": "userCpf",
+        "false": "error"
+      },
+      "conditional2": {
+        "type":"conditional",
+        "id": "conditional2",
+        "field": "cnpj",
+        "condition": "equals",
+        "param": "123124124",
         "true": "userCpf",
         "false": "error"
       },

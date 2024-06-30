@@ -109,50 +109,52 @@ async function handleStateAction(stateId, chatId) {
 
     await action(state, chatId);
 
-    while(state.type == "apiCall"){
-        console.log("API CALL")
-  
-        const nextState = state.options[0].next ? state.options[0].next : "welcome";
-        const actionType = chatFlow.states[nextState]?.type ?? "undefinedState";
-        console.log("Choosen nextState: ", nextState)
-        console.log("The next state by law is ", state.options[0].next)
-  
-        let action = stateActions[actionType] || (async () => {
-            await sendMessage("Algo inesperado aconteceu.", chatId);
-  
-        });
-    
-        await action(chatFlow.states[nextState], chatId);
-    
-        await redisClient.setUser(chatId, {currentStateId: nextState});
+    while(state.type && (state.type == "apiCall" || state.type == "conditional")){
+          if(state.type == "apiCall"){
+            console.log("API CALL")
+      
+            const nextState = state.options[0].next ? state.options[0].next : "welcome";
+            const actionType = chatFlow.states[nextState]?.type ?? "undefinedState";
+            console.log("Choosen nextState: ", nextState)
+            console.log("The next state by law is ", state.options[0].next)
+      
+            let action = stateActions[actionType] || (async () => {
+                await sendMessage("Algo inesperado aconteceu.", chatId);
+      
+            });
         
-        state = chatFlow.states[nextState];
+            await action(chatFlow.states[nextState], chatId);
+        
+            await redisClient.setUser(chatId, {currentStateId: nextState});
+            
+            state = chatFlow.states[nextState];
+    }else if(state.type == "conditional"){
+            console.log("Conditional")
+            if(state.condition){
+              const condition = conditionals[state?.condition ?? "undefinedState"] || (async () => {
+                await sendMessage("Algo inesperado aconteceu.", msg.from);
+              });
+              
+              const userFetchedData = await redisClient.getUserData(chatId,state.field)
+              console.log(userFetchedData,state.param)
+              if(await condition(userFetchedData, state.param)){
+                console.log("Condition match...")
+                let action = stateActions[chatFlow.states[state.true]?.type?? "undefinedState" ] || (async () => {await sendMessage("Algo inesperado aconteceu.", chatId);});
+                await action(chatFlow.states[state.true], chatId);
+                await redisClient.setUser(chatId, {currentStateId: chatFlow.states[state.true].id});
+                state = chatFlow.states[state.true];
+                break;
+              }else{
+                console.log("Condition not match...")
+                action = stateActions[chatFlow.states[state.false]?.type?? "undefinedState" ] 
+                await action(chatFlow.states[state.false], chatId);
+                await redisClient.setUser(chatId, {currentStateId: chatFlow.states[state.false].id}); 
+                state = chatFlow.states[state.false];
+              }
+          }
+    }
     }
 
-    while(state.type == "conditional"){
-      if(state.condition){
-        const condition = conditionals[state?.condition ?? "undefinedState"] || (async () => {
-          await sendMessage("Algo inesperado aconteceu.", msg.from);
-        });
-        
-        const userFetchedData = await redisClient.getUserData(chatId,state.field)
-        console.log(userFetchedData,state.param)
-        if(await condition(userFetchedData, state.param)){
-          console.log("Condition match...")
-          let action = stateActions[chatFlow.states[state.true]?.type?? "undefinedState" ] || (async () => {await sendMessage("Algo inesperado aconteceu.", chatId);});
-          await action(chatFlow.states[state.true], chatId);
-          await redisClient.setUser(chatId, {currentStateId: chatFlow.states[state.true].id});
-          state = chatFlow.states[state.true];
-          break;
-        }else{
-          console.log("Condition not match...")
-          action = stateActions[chatFlow.states[state.false]?.type?? "undefinedState" ] 
-          await action(chatFlow.states[state.false], chatId);
-          await redisClient.setUser(chatId, {currentStateId: chatFlow.states[state.false].id}); 
-          state = chatFlow.states[state.false];
-        }
-    }
-    }
 } finally {
     await redisClient.updateUserDataField(chatId, "lock", false);
   }

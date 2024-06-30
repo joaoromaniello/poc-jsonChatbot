@@ -97,7 +97,7 @@
         "id": "userName",
         "message": "Por favor, digite seu nome:",
         "field": "name",
-        "next": "userCpf"
+        "next": "conditional"
       },
       "conditional": {
         "type":"conditional",
@@ -105,7 +105,7 @@
         "field": "name",
         "condition": "equals",
         "param": "empresa",
-        "true": "welcome",
+        "true": "userCpf",
         "false": "error"
       },
       "userCnpj":{
@@ -121,7 +121,7 @@
         "id": "userCpf",
         "message": "Por favor, digite seu cpf (Apenas numeros):",
         "field": "cpf",
-        "next": "conditional",
+        "next": "userCnpj",
         "inputValidation":"cpfValidation"
       },
       "userIndustry":{
@@ -129,7 +129,7 @@
         "id": "userIndustry",
         "message": "Por favor, digite o nome da empresa.",
         "field": "industry",
-        "next": "conditional"
+        "next": "welcome"
       },
       "error": {
         "type":"iterationMenu",

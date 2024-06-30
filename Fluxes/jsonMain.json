@@ -9,7 +9,7 @@
     },
     "options": {
       "type": "iterationMenu",
-      "id": "welcome",
+      "id": "options",
       "message": "Como posso te ajudar?",
       "options": [
         {
@@ -21,20 +21,72 @@
           "next": "fluxB"
         },
         {
-          "text": "Gostaria de ir para o fluxo dinamico!!",
-          "next": "dynamicFlux"
+          "text": "Fazer meu cadastro",
+          "next": "register"
         },
         {
-          "text": "Fluxo de cadastro",
-          "next": "userName"
+          "text": "Encerrar",
+          "next": "finalMessage"
         }
       ]
     },
-    "final": {
+    "fluxA": {
       "type": "sendMessage",
-      "id": "final",
+      "id": "fluxA",
+      "message": "Você está no fluxo A!",
+      "next": "options"
+    },
+    "fluxB": {
+      "type": "sendMessage",
+      "id": "fluxB",
+      "message": "Você está no fluxo B!",
+      "next": "options"
+    },
+    "register": {
+      "type": "apiCall",
+      "id": "dynamicFlux",
+      "dynamicOptions": {
+        "url": "https://85314db9330548538cdb9b383d1b51b3.api.mockbin.io/",
+        "contentType": "json",
+        "fields": ["cnpj", "name"]
+      },
+      "next": "perguntaIdade"
+    },
+    "perguntaIdade": {
+      "type": "inputForm",
+      "id": "perguntaIdade",
+      "message": "Olá {{name}}, quantos anos você tem?",
+      "field": "idade",
+      "next": "verificaIdade"
+    },
+    "verificaIdade": {
+      "type": "condition",
+      "id": "verificaIdade",
+      "condition": "{{idade}} >= 18",
+      "true": "maiorIdade",
+      "false": "menorIdade"
+    },
+    "maiorIdade": {
+      "type": "sendMessage",
+      "id": "maiorIdade",
+      "message": "Você tem {{idade}} anos e é maior de idade!",
+      "next": "options"
+    },
+    "menorIdade": {
+      "type": "sendMessage",
+      "id": "menorIdade",
+      "message": "Você tem {{idade}} anos e é menor de idade!",
+      "next": "options"
+    },
+    "finalMessage": {
+      "type": "sendMessage",
+      "id": "finalMessage",
       "message": "Estou encerrando esse fluxo!",
-      "end": true
+      "next": "end"
+    },
+    "end": {
+      "type": "end",
+      "id": "end"
     }
   }
 }

@@ -14,22 +14,37 @@ const stateHandlers = {
   apiCall: async (state, user, event) => await apiCall(state, user, event),
   undefinedState: async (state, user, event) =>
     await undefinedState(state, user, event),
+  end: async (state, user, event) => {
+    return { end: true };
+  },
+  inputForm: async (state, user, event) => await inputForm(state, user, event),
+  condition: async (state, user, event) => await condition(state, user, event),
 };
 
 async function sendFlowMessage(state, user, event) {
-  // TODO replace fields in message
-  await sendMessage(user.phone, state.message);
-  // user.currentStateId = state.next;
+  await sendMessage(user.phone, parseMessage(state, user));
   return { next: state.next };
 }
 
-async function iterationMenu(state, user, event) {
-  if (event.type?.toLowerCase() === "wait_user_input") {
-    // pega a escolha do usuário e seta no next
-    const choiceIndex = parseInt(event.body, 10) - 1;
-    console.log("escolheu", choiceIndex);
+function parseMessage(state, user) {
+  return state.message.replace(/{{(.*?)}}/g, (match, param) => {
+    return user.params[param] || match;
+  });
+}
 
-    
+async function iterationMenu(state, user, event) {
+  console.log("iteration menu", event);
+  if (!!user.waitUserInput) {
+    const choiceIndex = parseInt(event.body, 10) - 1;
+
+    if (choiceIndex >= 0 && choiceIndex < state.options.length) {
+      return { next: state.options[choiceIndex].next };
+    } else {
+      await sendMessage(user.phone, "Opção inválida! Tente novamente.");
+      return {
+        type: "wait_user_input",
+      };
+    }
   }
 
   let message;
@@ -49,10 +64,55 @@ async function iterationMenu(state, user, event) {
   };
 }
 
-async function apiCall(state, user, message) {}
+async function apiCall(state, user, event) {
+  const response = await fetch(state.dynamicOptions.url);
+  const data = await response.json();
+
+  if (!state.dynamicOptions.fields) {
+    return { next: state.next };
+  }
+
+  state.dynamicOptions.fields.forEach((field) => {
+    if (data[field] !== undefined) {
+      user.params[field] = data[field];
+    }
+  });
+
+  return { next: state.next, data };
+}
+
+async function condition(state, user, event) {
+  const condition = state.condition.replace(
+    /\{\{(\w+)\}\}/g,
+    (_, key) => user.params[key]
+  );
+
+  let result;
+  try {
+    result = new Function(`return ${condition}`)();
+  } catch (error) {
+    console.error("Erro ao avaliar condição:", error);
+    throw new Error("Erro ao avaliar condição");
+  }
+
+  const nextStateId = result ? state.true : state.false;
+  return { next: nextStateId };
+}
 
 async function undefinedState(state, user, message) {
   await sendMessage(user.phone, "Algo deu errado! Tente novamente.");
+}
+
+async function inputForm(state, user, event) {
+  if (!!user.waitUserInput) {
+    user.params[state.field] = event.body;
+    return { next: state.next };
+  }
+
+  await sendMessage(user.phone, parseMessage(state, user));
+  return {
+    type: "wait_user_input",
+  };
 }
 
 async function handleState(user, event) {
@@ -67,15 +127,6 @@ async function handleState(user, event) {
     } catch (error) {
       reject(error);
     }
-    // finally {
-    // TODO será que vai funcionar assim?
-    // if (!!state.end) {
-    //   await redisClient.deleteUser(user.phone);
-    // } else if (!!state.next && state.next.length > 0) {
-    //   user.currentStateId = state.next[0];
-    //   await redisClient.setUser(user.phone, user);
-    // }
-    // }
   });
 }
 
@@ -93,7 +144,7 @@ async function receiveMessage(message, _client) {
   await flowService.startFlow(TENANT, message.from, treatEvent);
 
   // TODO caso a fila apague sem o usuário apagar, vai dar erro - arrumar isso
-  flowService.sendMessage(TENANT, message.from, {
+  flowService.publishMessage(TENANT, message.from, {
     type: "user_send_message",
     from: message.from,
     body: message.body,
@@ -118,12 +169,15 @@ async function treatEvent(event) {
 
   handleState(user, event)
     .then(async (response) => {
-      // TODO seto a informação que está esperando user input
-      // TODO se tiver next eu já publico algo novo na fila
+      if (!!response.end) {
+        await redisClient.deleteUser(user.phone);
+        flowService.endFlow(TENANT, user.phone);
+        return;
+      }
 
       if (!!response.next) {
         user.currentStateId = response.next;
-        flowService.sendMessage(TENANT, user.phone, {
+        flowService.publishMessage(TENANT, user.phone, {
           from: user.phone,
           ...response,
         });

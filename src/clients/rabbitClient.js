@@ -30,9 +30,8 @@ class FlowService {
 
       const queueName = `${tenant}_${user}_queue`;
       await this.channel.assertQueue(queueName, { durable: false });
-      await this.channel.bindQueue(queueName, this.exchangeName, queueName);
 
-      console.log(`Fluxo iniciado para o número ${user}. Fila: ${queueName}`);
+      await this.channel.bindQueue(queueName, this.exchangeName, queueName);
 
       // Configurar consumidor para esta fila
       await this.setupConsumer(queueName, messageHandlerCallback);
@@ -46,7 +45,7 @@ class FlowService {
     }
   }
 
-  async sendMessage(tenant, user, message) {
+  async publishMessage(tenant, user, message) {
     try {
       if (this.channel == null) {
         await this.connect();
@@ -70,19 +69,25 @@ class FlowService {
 
   async setupConsumer(queueName, messageHandlerCallback) {
     try {
-      await this.channel.consume(queueName, async (message) => {
-        if (message !== null) {
-          try {
-            const content = JSON.parse(message.content.toString());
+      await this.channel.consume(
+        queueName,
+        async (message) => {
+          if (message !== null) {
+            try {
+              const content = JSON.parse(message.content.toString());
 
-            await messageHandlerCallback(content);
-            this.channel.ack(message);
-          } catch (error) {
-            console.error("Erro ao processar mensagem:", error);
-            this.channel.reject(message, false);
+              await messageHandlerCallback(content);
+              this.channel.ack(message);
+            } catch (error) {
+              console.error("Erro ao processar mensagem:", error);
+              this.channel.reject(message, false);
+            }
           }
+        },
+        {
+          consumerTag: queueName,
         }
-      });
+      );
 
       console.log(`Consumidor configurado para a fila ${queueName}`);
     } catch (error) {
@@ -91,15 +96,14 @@ class FlowService {
     }
   }
 
-  // TODO - create publish message method
-
   async endFlow(tenant, user) {
     try {
       const queueName = this.userFlows[user];
+      await this.channel.cancel(queueName);
       await this.channel.unbindQueue(queueName, this.exchangeName, queueName);
       await this.channel.deleteQueue(queueName);
       console.log(`Fluxo encerrado. Fila ${queueName} removida.`);
-      delete this.userFlows[queueName];
+      delete this.userFlows[user];
     } catch (error) {
       console.error("Erro ao encerrar o fluxo:", error);
       throw error;

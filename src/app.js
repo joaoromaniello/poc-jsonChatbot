@@ -103,7 +103,7 @@ async function handleStateAction(stateId, chatId) {
     let state = chatFlow.states[stateId];
     console.log("StateId: ", stateId)
 
-    const action = stateActions[state?.type ?? "undefinedState"] || (async () => {
+    let action = stateActions[state?.type ?? "undefinedState"] || (async () => {
       await sendMessage("Algo inesperado aconteceu.", chatId);
     });
 
@@ -127,12 +127,33 @@ async function handleStateAction(stateId, chatId) {
         await redisClient.setUser(chatId, {currentStateId: nextState});
         
         state = chatFlow.states[nextState];
-        //Se o proximo do proximo (chatFlow.states[nextState].next) tiver o type == "apiCall", repete tudo, só que com o estado atual sendo o chatFlow.states[nextState]
     }
 
-
-
-  } finally {
+    while(state.type == "conditional"){
+      if(state.condition){
+        const condition = conditionals[state?.condition ?? "undefinedState"] || (async () => {
+          await sendMessage("Algo inesperado aconteceu.", msg.from);
+        });
+        
+        const userFetchedData = await redisClient.getUserData(chatId,state.field)
+        console.log(userFetchedData,state.param)
+        if(await condition(userFetchedData, state.param)){
+          console.log("Condition match...")
+          let action = stateActions[chatFlow.states[state.true]?.type?? "undefinedState" ] || (async () => {await sendMessage("Algo inesperado aconteceu.", chatId);});
+          await action(chatFlow.states[state.true], chatId);
+          await redisClient.setUser(chatId, {currentStateId: chatFlow.states[state.true].id});
+          state = chatFlow.states[state.true];
+          break;
+        }else{
+          console.log("Condition not match...")
+          action = stateActions[chatFlow.states[state.false]?.type?? "undefinedState" ] 
+          await action(chatFlow.states[state.false], chatId);
+          await redisClient.setUser(chatId, {currentStateId: chatFlow.states[state.false].id}); 
+          state = chatFlow.states[state.false];
+        }
+    }
+    }
+} finally {
     await redisClient.updateUserDataField(chatId, "lock", false);
   }
 }
@@ -197,35 +218,6 @@ client.on("message", async (msg) => {
         await redisClient.updateUserDataField(msg.from, currentState.field, message);
         await handleStateAction(currentState.next, msg.from);
         }
-        break;
-
-    case "conditional":
-        if (currentState.condition) {
-          const condition =
-          conditionals[currentState?.condition ?? "undefinedState"] ||
-            (async () => {
-              await sendMessage("Algo inesperado aconteceu.", msg.from);
-            });
-          
-
-          let field =  redisClient.getUserData(msg.from, currentState.field)
-
-          if(field == null || field == undefined){
-            await sendMessage("Campo não encontrado.", msg.from);
-            await handleStateAction(currentState.false, msg.from);
-            break;
-          }
-
-          if (await condition(field,currentState.param)) {
-            await handleStateAction(currentState.true, msg.from);
-            break;
-          }
-
-          await handleStateAction(currentState.false, msg.from);
-          break
-        }
-
-        await handleStateAction("welcome", msg.from);
         break;
 
     case "undefinedState":

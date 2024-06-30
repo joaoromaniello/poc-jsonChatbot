@@ -121,7 +121,7 @@
         "id": "userCpf",
         "message": "Por favor, digite seu cpf (Apenas numeros):",
         "field": "cpf",
-        "next": "userCnpj",
+        "next": "conditional",
         "inputValidation":"cpfValidation"
       },
       "userIndustry":{

@@ -153,6 +153,12 @@ async function handleStateAction(stateId, chatId) {
               }
           }
     }
+
+    }
+
+    if(!state.type){
+      action = stateActions[undefinedState]
+      await action("", chatId);
     }
 
 } finally {

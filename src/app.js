@@ -17,7 +17,8 @@ const stateActions = {
   },
 
   conditional: async (state, chatId) => {
-    await sendBaseMessage(state, chatId);
+    console.log(`Entered state ${state} in ${chatId}`)
+
   },
   undefinedState: async (state, chatId) => {
     await redisClient.setUser(chatId, {currentStateId: "error"});
